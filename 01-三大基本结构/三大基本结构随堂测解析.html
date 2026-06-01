@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>三大基本结构 · 随堂测逐题解析</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{
+    --bg:#F8F1E4;--surface:#FFFEF7;--surface2:#F9F3E8;
+    --border:#E4D5BC;--border-accent:#D4845A;
+    --accent:#C4723F;--accent-light:#D99A6F;--accent-glow:rgba(196,114,63,.08);
+    --green:#5B8C5A;--green-bg:rgba(91,140,90,.08);
+    --red:#C0392B;--red-bg:rgba(192,57,43,.06);
+    --blue:#4A6FA5;--blue-bg:rgba(74,111,165,.06);
+    --text:#3D2B1F;--text2:#7A6B5D;--text3:#A39585;
+    --code-bg:#F5EFE0;--tag-bg:#EDE3D0;
+  }
+  html{scroll-behavior:smooth}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","WenQuanYi Micro Hei",sans-serif;
+    background:var(--bg);color:var(--text);line-height:1.7;
+  }
+  ::-webkit-scrollbar{width:8px}
+  ::-webkit-scrollbar-track{background:var(--bg)}
+  ::-webkit-scrollbar-thumb{background:var(--accent-light);border-radius:4px}
+
+  /* Header */
+  .header{
+    padding:56px 40px 40px;text-align:center;
+    border-bottom:2px solid var(--border);
+    background:linear-gradient(180deg,var(--tag-bg) 0%,var(--bg) 100%);
+    position:relative;
+  }
+  .header::before{
+    content:'';position:absolute;top:0;left:0;right:0;height:4px;
+    background:linear-gradient(90deg,var(--accent),var(--accent-light),var(--accent));
+  }
+  .header-tag{display:inline-block;padding:5px 20px;border:1.5px solid var(--accent);border-radius:50px;font-size:12px;color:var(--accent);letter-spacing:2px;margin-bottom:16px;font-weight:500}
+  .header h1{font-size:clamp(22px,3.5vw,34px);font-weight:800;margin-bottom:8px;color:var(--text)}
+  .header p{color:var(--text2);font-size:15px}
+
+  /* Section divider */
+  .section-title{
+    max-width:1400px;margin:0 auto;padding:28px 40px 12px;
+    font-size:18px;font-weight:700;color:var(--accent);
+    display:flex;align-items:center;gap:10px;
+  }
+  .section-title::before{
+    content:'';width:4px;height:22px;border-radius:2px;
+    background:var(--accent);
+  }
+
+  /* Question card */
+  .q-card{
+    max-width:1400px;margin:0 auto;
+    display:grid;grid-template-columns:1fr 1fr;gap:0;
+    border-bottom:1px solid var(--border);
+    transition:background .2s;
+  }
+  .q-card:hover{background:var(--accent-glow)}
+
+  /* Left: question */
+  .q-left{
+    padding:32px 36px;border-right:1px solid var(--border);
+  }
+  .q-num{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:32px;height:32px;border-radius:50%;
+    background:var(--accent);color:#fff;font-size:14px;font-weight:700;
+    margin-bottom:12px;flex-shrink:0;
+  }
+  .q-num.judge{background:var(--blue)}
+  .q-text{font-size:15px;line-height:1.8;margin-bottom:16px;font-weight:500}
+  .q-options{display:flex;flex-direction:column;gap:6px}
+  .q-opt{
+    display:flex;align-items:flex-start;gap:8px;
+    padding:6px 12px;border-radius:6px;font-size:14px;line-height:1.6;
+    background:var(--surface2);border:1px solid transparent;
+    transition:all .15s;
+  }
+  .q-opt.correct{
+    background:var(--green-bg);border-color:var(--green);color:var(--green);font-weight:600;
+  }
+  .q-opt.wrong{
+    background:var(--red-bg);border-color:transparent;color:var(--text2);
+  }
+  .q-opt .label{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:22px;height:22px;border-radius:4px;flex-shrink:0;
+    background:var(--tag-bg);font-size:12px;font-weight:700;color:var(--text2);
+  }
+  .q-opt.correct .label{background:var(--green);color:#fff}
+  .q-opt.wrong .label{background:transparent;color:var(--text3)}
+
+  /* Judge options */
+  .judge-opts{display:flex;gap:10px}
+  .judge-opt{
+    padding:6px 20px;border-radius:6px;font-size:14px;
+    background:var(--surface2);border:1px solid transparent;
+    transition:all .15s;
+  }
+  .judge-opt.correct{background:var(--green-bg);border-color:var(--green);color:var(--green);font-weight:600}
+  .judge-opt.wrong{color:var(--text3)}
+
+  /* Code block */
+  .code-block{
+    background:var(--code-bg);border:1px solid var(--border);border-radius:8px;
+    padding:12px 16px;margin:10px 0;font-family:"Fira Code","Cascadia Code",Consolas,"Courier New",monospace;
+    font-size:13px;line-height:1.7;overflow-x:auto;white-space:pre;
+    color:#5C4A3A;
+  }
+  .code-inline{
+    background:var(--code-bg);border:1px solid var(--border);border-radius:4px;
+    padding:1px 6px;font-family:"Fira Code","Cascadia Code",Consolas,"Courier New",monospace;
+    font-size:13px;color:var(--accent);
+  }
+
+  /* Right: analysis */
+  .q-right{padding:32px 36px;background:var(--surface2)}
+  .q-right h3{
+    font-size:14px;color:var(--accent);margin-bottom:10px;
+    display:flex;align-items:center;gap:6px;font-weight:700;
+  }
+  .q-right h3::before{content:'💡'}
+  .analysis{font-size:14px;line-height:1.8;color:var(--text2)}
+  .analysis strong{color:var(--text);font-weight:600}
+  .analysis .key{color:var(--accent);font-weight:600}
+  .analysis .step{
+    display:block;padding:4px 12px;margin:4px 0;
+    border-left:3px solid var(--accent-light);background:var(--accent-glow);
+    border-radius:0 4px 4px 0;font-size:13px;
+  }
+
+  /* Answer badge */
+  .answer-badge{
+    display:inline-flex;align-items:center;gap:4px;
+    padding:3px 12px;border-radius:50px;font-size:12px;font-weight:600;
+    background:var(--green-bg);color:var(--green);margin-bottom:10px;
+  }
+
+  /* Responsive */
+  @media(max-width:900px){
+    .q-card{grid-template-columns:1fr}
+    .q-left{border-right:none;border-bottom:1px solid var(--border)}
+    .header{padding:36px 20px 28px}
+    .q-left,.q-right{padding:24px 20px}
+  }
+
+  /* Print */
+  @media print{
+    .header{background:none;padding:20px}
+    .q-card{page-break-inside:avoid}
+    body{background:#fff}
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-tag">C++ 随堂测</div>
+  <h1>三大基本结构 · 客观题逐题解析</h1>
+  <p>单选题 1-15 · 判断题 16-20 · 共20题</p>
+</div>
+
+<!-- ========== 单选题 ========== -->
+<div class="section-title">一、单选题（每题 5 分，共 75 分）</div>
+
+<!-- Q1 -->
+<div class="q-card">
+  <div class="q-left">
+    <div class="q-num">1</div>
+    <div class="q-text">C++表达式 (3 - 2) * 3 + 5 的值是（ ）</div>
+    <div class="q-options">
+      <div class="q-opt wrong"><span class="label">A</span>-13</div>
+      <div class="q-opt correct"><span class="label">B</span>8</div>
+      <div class="q-opt wrong"><span class="label">C</span>2</div>
+      <div class="q-opt wrong"><span class="label">D</span>0</div>
+    </div>
+  </div>
+  <div class="q-right">
+    <div class="answer-badge">✓ 答案 B</div>
+    <h3>解析</h3>
+    <div class="analysis">
+      按运算符优先级，先括号再乘法最后加法：<br>
+      <span class="step">(3 - 2) = 1</span>
+      <span class="step">1 * 3 = 3</span>
+      <span class="step">3 + 5 = <strong>8</strong></span>
+      <br>常见错误：误按从左到右无优先级计算，如 3-2=1, 1*3=3, 3+5=8 其实结果一致；但如果题目是 <span class="code-inline">3-2*3+5</span>，则应为 3-6+5=2。
+    </div>
+  </div>
+</div>
+
+<!-- Q2 -->
+<div class="q-card">
+  <div class="q-left">
+    <div class="q-num">2</div>
+    <div class="q-text">C++语句 <span class="code-inline">cout &lt;&lt; "5%2=" &lt;&lt; 5 % 2</span> 执行后的输出是（ ）</div>
+    <div class="q-options">
+      <div class="q-opt wrong"><span class="label">A</span>2 2</div>
+      <div class="q-opt wrong"><span class="label">B</span>1 1</div>
+      <div class="q-opt wrong"><span class="label">C</span>5%2=2</div>
+      <div class="q-opt correct"><span class="label">D</span>5%2=1</div>
+    </div>
+  </div>
+  <div class="q-right">
+    <div class="answer-badge">✓ 答案 D</div>
+    <h3>解析</h3>
+    <div class="analysis">
+      分两部分理解：<br>
+      <span class="step"><span class="code-inline">"5%2="</span> 是字符串字面量，原样输出 → 5%2=</span>
+      <span class="step"><span class="code-inline">5 % 2</span> 是取余运算，5÷2=2余1 → 1</span>
+      <br>两部分拼接输出：<strong>5%2=1</strong><br>
+      关键区分：<span class="code-inline">"5%2="</span> 里 % 是普通字符，不在运算；<span class="code-inline">5 % 2</span> 里 % 是取余运算符。
+    </div>
+  </div>
+</div>
+
+<!-- Q3 -->
+<div class="q-card">
+  <div class="q-left">
+    <div class="q-num">3</div>
+    <div class="q-text">以下选项中不符合C++变量命名规则的是？（ ）</div>
+    <div class="q-options">
+      <div class="q-opt wrong"><span class="label">A</span>student</div>
+      <div class="q-opt correct"><span class="label">B</span>2_from</div>
+      <div class="q-opt wrong"><span class="label">C</span>_to</div>
+      <div class="q-opt wrong"><span class="label">D</span>Text</div>
+    </div>
+  </div>
+  <div class="q-right">
+    <div class="answer-badge">✓ 答案 B</div>
+    <h3>解析</h3>
+    <div class="analysis">
+      C++变量命名规则：<br>
+      <span class="step">✅ 可以包含字母、数字、下划线</span>
+      <span class="step">✅ 可以以下划线开头（如 <span class="code-inline">_to</span>）</span>
+      <span class="step">❌ <strong>不能以数字开头</strong></span>
+      <br><span class="code-inline">2_from</span> 以数字 2 开头，违反规则。<br>
+      其他选项：student（字母开头 ✓）、_to（下划线开头 ✓）、Text（大写字母开头 ✓）均合法。
+    </div>
+  </div>
+</div>
+
+<!-- Q4 -->
+<div class="q-card">
+  <div class="q-left">
+    <div class="q-num">4</div>
+    <div class="q-text">下列4个表达式中，答案不是整数8的是？（ ）</div>
+    <div class="q-options">
+      <div class="q-opt wrong"><span class="label">A</span>abs(-8)</div>
+      <div class="q-opt correct"><span class="label">B</span>min(max(8, 9), 10)</div>
+      <div class="q-opt wrong"><span class="label">C</span>int(8.88)</div>
+      <div class="q-opt wrong"><span class="label">D</span>sqrt(64)</div>
+    </div>
+  </div>
+  <div class="q-right">
+    <div class="answer-badge">✓ 答案 B</div>
+    <h3>解析</h3>
+    <div class="analysis">
+      逐一计算：<br>
+      <span class="step">A. abs(-8) = <strong>8</strong> ✓</span>
+      <span class="step">B. max(8,9) = 9 → min(9,10) = <strong>9</strong> ✗ 不是8</span>
+      <span class="step">C. int(8.88) = <strong>8</strong> ✓（强制转换截断小数）</span>
+      <span class="step">D. sqrt(64) = <strong>8</strong> ✓</span>
+      <br>注意：<span class="code-inline">int(8.88)</span> 是截断（向零取整），不是四舍五入。
+    </div>
+  </div>
+</div>
+
+<!-- Q5 -->
+<div class="q-card">
+  <div class="q-left">
+    <div class="q-num">5</div>
+    <div class="q-text">执行C++语句 <span class="code-inline">cin &gt;&gt; a</span> 时如果输入 <span class="code-inline">5+2</span>，下述说法正确的是（ ）</div>
+    <div class="q-options">
+      <div class="q-opt wrong"><span class="label">A</span>变量a将被赋值为整数7</div>
+      <div class="q-opt wrong"><span class="label">B</span>变量a将被赋值为字符串，内容为5+2</div>
+      <div class="q-opt wrong"><span class="label">C</span>语句执行将报错，不能输入表达式</div>
+      <div class="q-opt correct"><span class="label">D</span>依赖于变量a的类型。如果没有定义，会有编译错误</div>
+    </div>
+  </div>
+  <div class="q-right">
+    <div class="answer-badge">✓ 答案 D</div>
+    <h3>解析</h3>
+    <div class="analysis">
+      <span class="code-inline">cin &gt;&gt; a</span> 的行为完全取决于 a 的类型：<br>
+      <span class="step">若 a 是 <span class="code-inline">int</span>：读到 5，遇到 + 停止，a = 5</span>
+      <span class="step">若 a 是 <span class="code-inline">string</span>：读到空白符前，a = "5+2"</span>
+      <span class="step">若 a 是 <span class="code-inline">char</span>：只读一个字符，a = '5'</span>
+      <br>变量未定义时编译直接报错。所以 <strong>行为取决于 a 的类型</strong>，选项 D 正确。<br>
+      A、B、C 都做了片面假设，忽略了类型的影响。
+    </div>
+  </div>
+</div>
+
+<!-- Q6 -->
+<div class="q-card">
+  <div class="q-left">
+    <div class="q-num">6</div>
+    <div class="q-text">下面C++代码执行时输入21后，有关描述正确的是（ ）</div>
+    <div class="code-block">int N;
+cin >> N;
+if(N % 3 == 0)
+    cout << "能被3整除";      // 第4行
+else if (N % 7 == 0)
+    cout << "能被7整除";      // 第7行
+else
+    cout << "不能被3和7整除";  // 第9行</div>
+    <div class="q-options">
+      <div class="q-opt correct"><span class="label">A</span>代码第4行被执行</div>
+      <div class="q-opt wrong"><span class="label">B</span>第4和第7行代码都被执行</div>
+      <div class="q-opt wrong"><span class="label">C</span>仅有代码第7行被执行</div>
+      <div class="q-opt wrong"><span class="label">D</span>第8行代码将被执行，因为input()输入为字符串</div>
+    </div>
+  </div>
+  <div class="q-right">
+    <div class="answer-badge">✓ 答案 A</div>
+    <h3>解析</h3>
+    <div class="analysis">
+      输入 N = 21：<br>
+      <span class="step">21 % 3 == 0 → <strong>true</strong>，进入 if 分支</span>
+      <span class="step">执行第4行，输出 "能被3整除"</span>
+      <span class="step">else if 和 else 分支被跳过，不执行</span>
+      <br>关键：if-else if-else 是<strong>互斥分支</strong>，只会执行第一个满足条件的分支。21 既能被3整除也能被7整除，但因为先判断了 %3==0，就不再往下走了。<br>
+      D 选项的 <span class="code-inline">input()</span> 是 Python 函数，与 C++ 无关。
+    </div>
+  </div>
+</div>
+
+<!-- Q7 -->
+<div class="q-card">
+  <div class="q-left">
+    <div class="q-num">7</div>
+    <div class="q-text">下面C++代码第2行，总共被执行次数是（ ）</div>
+    <div class="code-block">for(int i = 0; i &lt; 20; i++)   // 第1行
+    cout &lt;&lt; "i";              // 第2行</div>
+    <div class="q-options">
+      <div class="q-opt wrong"><span class="label">A</span>10</div>
+      <div class="q-opt wrong"><span class="label">B</span>19</div>
+      <div class="q-opt correct"><span class="label">C</span>20</div>
+      <div class="q-opt wrong"><span class="label">D</span>21</div>
+    </div>
+  </div>
+  <div class="q-right">
+    <div class="answer-badge">✓ 答案 C</div>
+    <h3>解析</h3>
+    <div class="analysis">
+      循环执行过程：<br>
+      <span class="step">i 从 0 开始，每次 +1，条件 i &lt; 20</span>
+      <span class="step">i = 0,1,2,...,19 时条件成立，循环体执行</span>
+      <span class="step">i = 20 时条件不成立，退出循环</span>
+      <br>循环体执行次数 = 20 - 0 = <strong>20次</strong><br>
+      区分：条件判断执行了 21 次（0~20），但循环体只执行 20 次。
+    </div>
+  </div>
+</div>
+
+<!-- Q8 -->
+<div class="q-card">
+  <div class="q-left">
+    <div class="q-num">8</div>
+    <div class="q-text">在C++中，与 <span class="code-inline">for(int i = 10; i &lt; 20; i += 2) cout &lt;&lt; i;</span> 输出结果相同的是（ ）</div>
+    <div class="q-options">
+      <div class="q-opt correct"><span class="label">A</span><span class="code-inline">for(int i = 10; i &lt; 19; i +=2) cout &lt;&lt; i;</span></div>
+      <div class="q-opt wrong"><span class="label">B</span><span class="code-inline">for(int i = 11; i &lt; 19; i +=2) cout &lt;&lt; i;</span></div>
+      <div class="q-opt wrong"><span class="label">C</span><span class="code-inline">for(int i = 10; i &lt; 21; i +=2) cout &lt;&lt; i;</span></div>
+      <div class="q-opt wrong"><span class="label">D</span>以上均不对</div>
+    </div>
+  </div>
+  <div class="q-right">
+    <div class="answer-badge">✓ 答案 A</div>
+    <h3>解析</h3>
+    <div class="analysis">
+      原始循环输出：10, 12, 14, 16, 18<br>
+      <span class="step">A. i=10,12,14,16,18（18&lt;19成立，20&lt;19不成立）→ 输出相同 ✓</span>
+      <span class="step">B. 起始为11，输出 11,13,15,17 → 不同 ✗</span>
+      <span class="step">C. i=10,12,14,16,18,20（20&lt;21成立）→ 多输出20 ✗</span>
+      <br>关键：上界从 20 改为 19 不影响结果，因为步长为2，i 的最后一个偶数值是 18。
+    </div>
+  </div>
+</div>
+
+<!-- Q9 -->
+<div class="q-card">
+  <div class="q-left">
+    <div class="q-num">9</div>
+    <div class="q-text">下列关于C++语言的叙述，不正确的是（ ）</div>
+    <div class="q-options">
+      <div class="q-opt correct"><span class="label">A</span>double类型的变量占用内存的大小是浮动的</div>
+      <div class="q-opt wrong"><span class="label">B</span>bool类型的变量占用1字节内存</div>
+      <div class="q-opt wrong"><span class="label">C</span>int类型变量的取值范围不是无限的</div>
+      <div class="q-opt wrong"><span class="label">D</span>char类型的变量有256种取值</div>
+    </div>
+  </div>
+  <div class="q-right">
+    <div class="answer-badge">✓ 答案 A</div>
+    <h3>解析</h3>
+    <div class="analysis">
+      <span class="step">A. ❌ <span class="code-inline">double</span> 固定占 8 字节，大小不会"浮动"</span>
+      <span class="step">B. ✅ <span class="code-inline">bool</span> 占 1 字节（虽只需1位，但最小寻址单位是字节）</span>
+      <span class="step">C. ✅ <span class="code-inline">int</span> 通常是4字节，范围 -2³¹ ~ 2³¹-1，有限</span>
+      <span class="step">D. ✅ <span class="code-inline">char</span> 占1字节 = 8位 = 2⁸ = 256种取值</span>
+      <br>注意：A 选项的"浮动"容易和浮点数（float/double）的名称混淆，但<strong>浮点数的存储大小是固定的</strong>，"浮点"指的是小数点可以移动的表示方式。
+    </div>
+  </div>
+</div>
+
+<!-- Q10 -->
+<div class="q-card">
+  <div class="q-left">
+    <div class="q-num">10</div>
+    <div class="q-text">下面C++代码执行后的输出是（ ）</div>
+    <div class="code-block">int n, a, m, i;
+n = 3, a = 5;
+m = (a - 1) * 2;
+for (i = 0; i &lt; n - 1; i++)
+    m = (m - 1) * 2;
+cout &lt;&lt; m;</div>
+    <div class="q-options">
+      <div class="q-opt wrong"><span class="label">A</span>8</div>
+      <div class="q-opt wrong"><span class="label">B</span>14</div>
+      <div class="q-opt correct"><span class="label">C</span>26</div>
+      <div class="q-opt wrong"><span class="label">D</span>50</div>
+    </div>
+  </div>
+  <div class="q-right">
+    <div class="answer-badge">✓ 答案 C</div>
+    <h3>解析</h3>
+    <div class="analysis">
+      初始值：n=3, a=5<br>
+      <span class="step">m = (5-1) * 2 = <strong>8</strong></span>
+      <span class="step">循环 n-1 = 2 次：</span>
+      <span class="step">i=0: m = (8-1)*2 = <strong>14</strong></span>
+      <span class="step">i=1: m = (14-1)*2 = <strong>26</strong></span>
+      <br>输出 <strong>26</strong>。<br>
+      如果继续推导：再循环一次会得到 (26-1)*2=50，这就是选项 D 的来源——算多了一次循环。
+    </div>
+  </div>
+</div>
+
+<!-- Q11 -->
+<div class="q-card">
+  <div class="q-left">
+    <div class="q-num">11</div>
+    <div class="q-text">如果 a 和 b 均为 int 类型的变量，下列表达式能正确判断"a等于0或b等于0"的是（ ）</div>
+    <div class="q-options">
+      <div class="q-opt correct"><span class="label">A</span><span class="code-inline">(a == 0) || (b == 0)</span></div>
+      <div class="q-opt wrong"><span class="label">B</span><span class="code-inline">(a == 0) &amp;&amp; (b == 0)</span></div>
+      <div class="q-opt wrong"><span class="label">C</span><span class="code-inline">(!a) || (!b)</span></div>
+      <div class="q-opt wrong"><span class="label">D</span><span class="code-inline">(a == b == 0)</span></div>
+    </div>
+  </div>
+  <div class="q-right">
+    <div class="answer-badge">✓ 答案 A</div>
+    <h3>解析</h3>
+    <div class="analysis">
+      逐一分析：<br>
+      <span class="step">A. <span class="code-inline">(a==0)||(b==0)</span> → 用 || 表示"或"，语义明确 ✓</span>
+      <span class="step">B. <span class="code-inline">(a==0)&amp;&amp;(b==0)</span> → &amp;&amp; 是"且"，表示两个都为0 ✗</span>
+      <span class="step">C. <span class="code-inline">(!a)||(!b)</span> → 对于 int，!a 等价于 a==0，逻辑上等价但用了隐式转换，不够规范</span>
+      <span class="step">D. <span class="code-inline">(a==b==0)</span> → C++链式比较：先算 a==b 得 bool(0或1)，再和0比较，完全错误 ✗</span>
+      <br>C 选项虽然逻辑等价，但 <span class="code-inline">!a</span> 依赖隐式 bool 转换，可读性差，A 是最标准的写法。
+    </div>
+  </div>
+</div>
+
+<!-- Q12 -->
+<div class="q-card">
+  <div class="q-left">
+    <div class="q-num">12</div>
+    <div class="q-text">如果 a 为 char 类型的变量，下列哪个表达式可以正确判断"a是小写字母"？</div>
+    <div class="q-options">
+      <div class="q-opt wrong"><span class="label">A</span><span class="code-inline">a&lt;=a&lt;=z</span></div>
+      <div class="q-opt wrong"><span class="label">B</span><span class="code-inline">a-'a'&lt;='z'-'a'</span></div>
+      <div class="q-opt wrong"><span class="label">C</span><span class="code-inline">'a'&lt;=a&lt;='z'</span></div>
+      <div class="q-opt correct"><span class="label">D</span><span class="code-inline">a&gt;='a' &amp;&amp; a&lt;='z'</span></div>
+    </div>
+  </div>
+  <div class="q-right">
+    <div class="answer-badge">✓ 答案 D</div>
+    <h3>解析</h3>
+    <div class="analysis">
+      核心知识点：<strong>C++不支持数学中的链式比较</strong>。<br>
+      <span class="step">A. <span class="code-inline">a&lt;=a&lt;=z</span> → 语法混乱，变量a和标识符z混用 ✗</span>
+      <span class="step">B. <span class="code-inline">a-'a'&lt;='z'-'a'</span> → 当 a='A' 时，'A'-'a'为负数，负数&lt;=25 仍为true ✗</span>
+      <span class="step">C. <span class="code-inline">'a'&lt;=a&lt;='z'</span> → 链式比较：先算 'a'&lt;=a 得 0或1，再判断 0/1&lt;='z' 始终为true ✗</span>
+      <span class="step">D. <span class="code-inline">a&gt;='a' &amp;&amp; a&lt;='z'</span> → 两个条件同时满足，才是小写字母 ✓</span>
+      <br>C 选项是最常见的陷阱！<span class="code-inline">'a'&lt;=a&lt;='z'</span> 在 Python 里正确，但在 C++ 里会被解析为 <span class="code-inline">('a'&lt;=a) &lt;= 'z'</span>，几乎永远为 true。
+    </div>
+  </div>
+</div>
+
+<!-- Q13 -->
+<div class="q-card">
+  <div class="q-left">
+    <div class="q-num">13</div>
+    <div class="q-text">在下列代码的横线处填写（ ），使得输出是 50 10</div>
+    <div class="code-block">int a = 10, b = 50;
+________;  // 在此处填写代码
+b -= a;
+a += b;
+cout &lt;&lt; a &lt;&lt; " " &lt;&lt; b;</div>
+    <div class="q-options">
+      <div class="q-opt wrong"><span class="label">A</span><span class="code-inline">a -= b;</span></div>
+      <div class="q-opt wrong"><span class="label">B</span><span class="code-inline">a += b;</span></div>
+      <div class="q-opt correct"><span class="label">C</span><span class="code-inline">a = b - a;</span></div>
+      <div class="q-opt wrong"><span class="label">D</span><span class="code-inline">a = b;</span></div>
+    </div>
+  </div>
+  <div class="q-right">
+    <div class="answer-badge">✓ 答案 C</div>
+    <h3>解析</h3>
+    <div class="analysis">
+      初始：a=10, b=50，目标输出 a=50, b=10（交换）<br>
+      <span class="step">C. a = b - a → a = 50-10 = <strong>40</strong></span>
+      <span class="step">然后 b -= a → b = 50-40 = <strong>10</strong></span>
+      <span class="step">然后 a += b → a = 40+10 = <strong>50</strong></span>
+      <span class="step">输出 50 10 ✓</span>
+      <br>其他选项验证：<br>
+      A. a-=b → a=-40, b-=(-40)=90, a+=90=50 → 输出 50 90 ✗<br>
+      B. a+=b → a=60, b-=60=-10, a+=(-10)=50 → 输出 50 -10 ✗<br>
+      D. a=b → a=50, b-=50=0, a+=0=50 → 输出 50 0 ✗
+    </div>
+  </div>
+</div>
+
+<!-- Q14 -->
+<div class="q-card">
+  <div class="q-left">
+    <div class="q-num">14</div>
+    <div class="q-text">"三天打渔，两天晒网"。小杨前三天打渔，后两天晒网，一直重复。以下代码判断第n天是打鱼还是晒网，横线处应填写？（ ）</div>
+    <div class="code-block">int n, i;
+cin >> n;
+i = n % 5;
+if (________)      // 在此处填写代码
+    cout &lt;&lt; "晒网";
+else
+    cout &lt;&lt; "打鱼";</div>
+    <div class="q-options">
+      <div class="q-opt wrong"><span class="label">A</span><span class="code-inline">i == 0</span></div>
+      <div class="q-opt wrong"><span class="label">B</span><span class="code-inline">i == 4</span></div>
+      <div class="q-opt wrong"><span class="label">C</span><span class="code-inline">i == 0 &amp;&amp; i == 4</span></div>
+      <div class="q-opt correct"><span class="label">D</span><span class="code-inline">i == 0 || i == 4</span></div>
+    </div>
+  </div>
+  <div class="q-right">
+    <div class="answer-badge">✓ 答案 D</div>
+    <h3>解析</h3>
+    <div class="analysis">
+      5天一周期：第1,2,3天打鱼，第4,5天晒网。<br>
+      <span class="step">n % 5 的值：1,2,3 → 打鱼；4,0 → 晒网</span>
+      <span class="step">晒网条件：i == 4（第4天）或 i == 0（第5天）</span>
+      <span class="step">用 ||（逻辑或）连接：<span class="code-inline">i == 0 || i == 4</span></span>
+      <br>选项 C 用 &amp;&amp;（逻辑与），i 不可能同时等于0和4，永远为 false。<br>
+      验证：n=5 → i=0 → 晒网 ✓；n=4 → i=4 → 晒网 ✓；n=3 → i=3 → 打鱼 ✓
+    </div>
+  </div>
+</div>
+
+<!-- Q15 -->
+<div class="q-card">
+  <div class="q-left">
+    <div class="q-num">15</div>
+    <div class="q-text">判断回文数，横线处应填写？（ ）</div>
+    <div class="code-block">int n, a, k;
+cin >> n;
+a = 0;
+k = n;
+while (n > 0) {
+    a = ________;  // 在此处填写代码
+    n /= 10;
+}
+if (a == k)
+    cout &lt;&lt; "是回文数";
+else
+    cout &lt;&lt; "不是回文数";</div>
+    <div class="q-options">
+      <div class="q-opt correct"><span class="label">A</span><span class="code-inline">10 * a + n % 10</span></div>
+      <div class="q-opt wrong"><span class="label">B</span><span class="code-inline">a + n % 10</span></div>
+      <div class="q-opt wrong"><span class="label">C</span><span class="code-inline">10 * a + n / 10</span></div>
+      <div class="q-opt wrong"><span class="label">D</span><span class="code-inline">a + n / 10</span></div>
+    </div>
+  </div>
+  <div class="q-right">
+    <div class="answer-badge">✓ 答案 A</div>
+    <h3>解析</h3>
+    <div class="analysis">
+      算法思路：逐位取出 n 的末尾数字，构建逆序数 a。<br>
+      以 n=123 为例：
+      <span class="step">初始 a=0, n=123</span>
+      <span class="step">第1轮：a = 10*0 + 123%10 = <strong>3</strong>，n = 12</span>
+      <span class="step">第2轮：a = 10*3 + 12%10 = <strong>32</strong>，n = 1</span>
+      <span class="step">第3轮：a = 10*32 + 1%10 = <strong>321</strong>，n = 0，退出</span>
+      <br><span class="code-inline">10 * a</span> 把已有数字左移一位（腾出个位），<span class="code-inline">n % 10</span> 取末位数字填入。<br>
+      B 缺少 *10，数字无法正确左移；C、D 用了 n/10 取的是去掉末位后的数，逻辑完全错误。
+    </div>
+  </div>
+</div>
+
+<!-- ========== 判断题 ========== -->
+<div class="section-title">二、判断题（每题 5 分，共 25 分）</div>
+
+<!-- Q16 -->
+<div class="q-card">
+  <div class="q-left">
+    <div class="q-num judge">16</div>
+    <div class="q-text">如果有以下C++代码，那么 <span class="code-inline">cout &lt;&lt; t</span> 的结果为 28.5。</div>
+    <div class="code-block">double s;
+int t;
+s = 18.5;
+t = int(s) + 10;</div>
+    <div class="judge-opts">
+      <div class="judge-opt wrong">✓ 正确</div>
+      <div class="judge-opt correct">✗ 错误</div>
+    </div>
+  </div>
+  <div class="q-right">
+    <div class="answer-badge">✓ 答案：错误</div>
+    <h3>解析</h3>
+    <div class="analysis">
+      <span class="step"><span class="code-inline">int(s)</span> = int(18.5) = <strong>18</strong>（截断小数部分）</span>
+      <span class="step"><span class="code-inline">t = 18 + 10 = 28</strong></span>
+      <span class="step">t 是 <span class="code-inline">int</span> 类型，<span class="code-inline">cout &lt;&lt; t</span> 输出 <strong>28</strong>，不是 28.5</span>
+      <br>两个要点：<br>
+      1. <span class="code-inline">int(s)</span> 截断（向零取整），不是四舍五入<br>
+      2. 即使计算过程有小数，赋值给 int 变量后小数部分丢失
+    </div>
+  </div>
+</div>
+
+<!-- Q17 -->
+<div class="q-card">
+  <div class="q-left">
+    <div class="q-num judge">17</div>
+    <div class="q-text"><span class="code-inline">cout &lt;&lt; (8 &lt; 9 &lt; 10)</span> 的输出结果为 true。</div>
+    <div class="judge-opts">
+      <div class="judge-opt wrong">✓ 正确</div>
+      <div class="judge-opt correct">✗ 错误</div>
+    </div>
+  </div>
+  <div class="q-right">
+    <div class="answer-badge">✓ 答案：错误</div>
+    <h3>解析</h3>
+    <div class="analysis">
+      C++ 中链式比较从左到右：<br>
+      <span class="step"><span class="code-inline">8 &lt; 9</span> → true（即 1）</span>
+      <span class="step"><span class="code-inline">1 &lt; 10</span> → true（即 1）</span>
+      <span class="step"><span class="code-inline">cout &lt;&lt; 1</span> 输出 <strong>1</strong>，而不是字符串 "true"</span>
+      <br>虽然表达式结果为 true，但 <span class="code-inline">cout</span> 默认输出 bool 值为 0/1，不是 "true"/"false"。<br>
+      要输出 "true" 需使用 <span class="code-inline">cout &lt;&lt; boolalpha &lt;&lt; (8&lt;9&lt;10)</span>。<br>
+      另外注意：这个链式比较的<strong>数学含义</strong>（8&lt;9 且 9&lt;10）在C++中并不成立，C++只是恰好算出了 true。
+    </div>
+  </div>
+</div>
+
+<!-- Q18 -->
+<div class="q-card">
+  <div class="q-left">
+    <div class="q-num judge">18</div>
+    <div class="q-text"><span class="code-inline">for(i = 0; i &lt; 100; i += 2) ;</span> 语句中变量 i 的取值范围是 0 到 99。</div>
+    <div class="judge-opts">
+      <div class="judge-opt wrong">✓ 正确</div>
+      <div class="judge-opt correct">✗ 错误</div>
+    </div>
+  </div>
+  <div class="q-right">
+    <div class="answer-badge">✓ 答案：错误</div>
+    <h3>解析</h3>
+    <div class="analysis">
+      i 的取值为 0, 2, 4, 6, ..., 98（全是偶数）。<br>
+      <span class="step">i 从 0 开始，每次 +2，条件 i &lt; 100</span>
+      <span class="step">i 的最后一个值是 98，然后 i+=2 变为 100，退出循环</span>
+      <br>"取值范围是0到99"有两处错误：<br>
+      1. <strong>i 只取偶数</strong>，不可能取到 1, 3, 5, ..., 99<br>
+      2. 循环结束后 i = <strong>100</strong>，超出 0~99 的范围
+    </div>
+  </div>
+</div>
+
+<!-- Q19 -->
+<div class="q-card">
+  <div class="q-left">
+    <div class="q-num judge">19</div>
+    <div class="q-text">已知 A 的 ASCII 码值为 65，表达式 <span class="code-inline">int('C') + abs(-5.8)</span> 的值为 72.8。</div>
+    <div class="judge-opts">
+      <div class="judge-opt correct">✓ 正确</div>
+      <div class="judge-opt wrong">✗ 错误</div>
+    </div>
+  </div>
+  <div class="q-right">
+    <div class="answer-badge">✓ 答案：正确</div>
+    <h3>解析</h3>
+    <div class="analysis">
+      <span class="step"><span class="code-inline">int('C')</span>：A=65，C 是第3个字母 → 65+2 = <strong>67</strong></span>
+      <span class="step"><span class="code-inline">abs(-5.8)</span>：在 &lt;cmath&gt; 中，abs 支持浮点数 → <strong>5.8</strong></span>
+      <span class="step">67 + 5.8 = <strong>72.8</strong></span>
+      <br>注意：如果使用 &lt;cstdlib&gt; 中的 <span class="code-inline">abs()</span>，参数会被转为 int，abs(-5.8) = abs(-5) = 5，结果为 72 而非 72.8。本题默认使用 &lt;cmath&gt;，支持 double 参数。
+    </div>
+  </div>
+</div>
+
+<!-- Q20 -->
+<div class="q-card">
+  <div class="q-left">
+    <div class="q-num judge">20</div>
+    <div class="q-text">任何一个 for 循环都可以转化为等价的 while 循环。（ ）</div>
+    <div class="judge-opts">
+      <div class="judge-opt correct">✓ 正确</div>
+      <div class="judge-opt wrong">✗ 错误</div>
+    </div>
+  </div>
+  <div class="q-right">
+    <div class="answer-badge">✓ 答案：正确</div>
+    <h3>解析</h3>
+    <div class="analysis">
+      for 循环和 while 循环是等价的控制结构：<br>
+      <span class="step"><span class="code-inline">for(init; condition; update) { body }</span></span>
+      <span class="step">等价于：</span>
+      <span class="step"><span class="code-inline">init; while(condition) { body; update; }</span></span>
+      <br>例如：
+      <div class="code-block">for(int i=0; i&lt;10; i++) cout&lt;&lt;i;
+// 等价于
+int i=0;
+while(i&lt;10) { cout&lt;&lt;i; i++; }</div>
+      这是编程语言的基本等价关系，<strong>任何 for 循环都能用 while 重写，反之亦然</strong>。
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

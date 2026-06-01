@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>字符串 · 随堂测逐题解析</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{
+    --bg:#fef9f3;
+    --glass:rgba(255,255,255,.88);
+    --glass-border:rgba(255,255,255,1);
+    --glass-shadow:0 8px 32px rgba(100,116,139,.1);
+    --surface2:rgba(253,240,238,.5);
+    --accent:#e07a5f;--accent-light:#f2a07b;--accent-glow:rgba(224,122,95,.08);
+    --green:#5a9a6e;--green-bg:rgba(90,154,110,.12);--green-border:#a8d5b5;
+    --text:#4a4a4a;--text2:#6b6b6b;--text3:#9a9a9a;
+  }
+  html{scroll-behavior:smooth}
+  body{
+    font-family:"ZCOOL XiaoWei","PingFang SC","Hiragino Sans GB","Microsoft YaHei","LXGW WenKai",cursive;
+    background:var(--bg);color:var(--text);line-height:1.8;min-height:100vh;
+  }
+  ::-webkit-scrollbar{width:6px}
+  ::-webkit-scrollbar-track{background:transparent}
+  ::-webkit-scrollbar-thumb{background:#f2a07b;border-radius:3px}
+
+  .header{padding:56px 40px 44px;text-align:center}
+  .header-glass{
+    background:var(--glass);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+    border:1px solid var(--glass-border);border-radius:28px;
+    box-shadow:var(--glass-shadow);padding:40px 32px;max-width:680px;margin:0 auto;
+  }
+  .header-tag{
+    display:inline-block;padding:6px 22px;border-radius:50px;
+    font-size:13px;letter-spacing:2px;font-weight:700;
+    background:var(--accent);color:#fff;margin-bottom:14px;
+  }
+  .header h1{font-size:clamp(24px,4vw,32px);font-weight:800;margin-bottom:6px;color:var(--text)}
+  .header p{color:var(--text2);font-size:15px}
+
+  .section-title{
+    max-width:1400px;margin:0 auto;padding:28px 24px 12px;
+    font-size:17px;font-weight:700;color:var(--accent);
+    display:flex;align-items:center;gap:10px;
+  }
+  .section-title::before{
+    content:'';width:4px;height:22px;border-radius:2px;
+    background:var(--accent);
+  }
+
+  .q-card{
+    max-width:1400px;margin:0 auto 16px;
+    display:grid;grid-template-columns:1fr 1fr;gap:0;
+    background:var(--glass);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+    border:1px solid var(--glass-border);border-radius:20px;
+    box-shadow:0 4px 24px rgba(100,116,139,.08);overflow:hidden;
+    transition:transform .2s,box-shadow .2s;
+  }
+  .q-card:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(224,122,95,.1)}
+
+  .q-left{padding:30px 34px;border-right:1px solid rgba(255,255,255,.7)}
+  .q-num{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:34px;height:34px;border-radius:12px;
+    background:linear-gradient(135deg,var(--accent),var(--accent-light));
+    color:#fff;font-size:15px;font-weight:700;margin-bottom:12px;
+  }
+  .q-text{font-size:17px;line-height:1.9;margin-bottom:16px;font-weight:600;color:var(--text)}
+  .q-options{display:flex;flex-direction:column;gap:7px}
+  .q-opt{
+    display:flex;align-items:flex-start;gap:10px;
+    padding:9px 13px;border-radius:12px;font-size:15.5px;line-height:1.7;
+    background:var(--surface2);border:2px solid transparent;transition:all .15s;
+    color:var(--text2);font-weight:500;
+  }
+  .q-opt.correct{
+    background:var(--green-bg);border-color:var(--green-border);
+    color:var(--green);font-weight:700;
+  }
+  .q-opt.wrong{color:var(--text3)}
+  .q-opt .label{
+    display:inline-flex;align-items:center;justify-content:center;
+    min-width:26px;height:26px;border-radius:8px;flex-shrink:0;
+    background:rgba(224,122,95,.15);font-size:12px;font-weight:800;color:var(--accent);
+    margin-top:2px;
+  }
+  .q-opt.correct .label{background:var(--green);color:#fff}
+
+  .judge-opts{display:flex;gap:12px}
+  .judge-opt{
+    padding:8px 28px;border-radius:12px;font-size:15.5px;font-weight:600;
+    background:var(--surface2);border:2px solid transparent;color:var(--text2);
+  }
+  .judge-opt.correct{background:var(--green-bg);border-color:var(--green-border);color:var(--green)}
+  .judge-opt.wrong{color:var(--text3)}
+
+  .code-block{
+    background:#1e1e1e;border:1px solid #3c3c3c;border-radius:12px;
+    padding:14px 18px;margin:8px 0;
+    font-family:"Cascadia Code","Fira Code","霞鹜文楷等宽",Consolas,monospace;
+    font-size:14px;line-height:1.75;overflow-x:auto;white-space:pre;
+    color:#d4d4d4;
+  }
+  .code-inline{
+    background:rgba(224,122,95,.12);border-radius:6px;
+    padding:2px 8px;font-family:"Cascadia Code","Fira Code","霞鹜文楷等宽",Consolas,monospace;
+    font-size:14.5px;color:#c04830;font-weight:700;
+  }
+  .kw{color:#6db8d4}  .tp{color:#6db8d4}  .fn{color:#5ba8d4}  .st{color:#e8925a}
+  .num{color:#a8d5b5} .cmt{color:#8bc48a} .pp{color:#d4a5e8} .op{color:#d4d4d4}
+  .ns{color:#6db8d4}  .id{color:#5ba8d4}
+
+  .q-right{padding:30px 34px;background:var(--surface2)}
+  .q-right h3{
+    font-size:14.5px;color:var(--accent);margin-bottom:10px;
+    display:flex;align-items:center;gap:6px;font-weight:700;
+  }
+  .q-right h3::before{content:'✨'}
+  .analysis{font-size:15px;line-height:1.9;color:var(--text2)}
+  .analysis strong{color:var(--text);font-weight:700}
+  .step{
+    display:block;padding:6px 14px;margin:4px 0;
+    border-left:3px solid var(--accent-light);
+    background:rgba(242,160,123,.08);border-radius:0 10px 10px 0;
+    font-size:14.5px;color:var(--text2);font-weight:500;
+  }
+
+  .answer-badge{
+    display:inline-flex;align-items:center;gap:5px;
+    padding:5px 16px;border-radius:50px;font-size:13px;font-weight:700;
+    background:var(--green-bg);color:var(--green);margin-bottom:10px;
+  }
+
+  @media(max-width:900px){
+    .q-card{grid-template-columns:1fr}
+    .q-left{border-right:none;border-bottom:1px solid rgba(255,255,255,.7)}
+    .header{padding:28px 16px}.header-glass{padding:28px 20px}
+    .q-left,.q-right{padding:22px 18px}
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-glass">
+    <div class="header-tag">C++ 随堂测</div>
+    <h1>字符串 · 逐题解析</h1>
+    <p>单选题 · 共20题</p>
+  </div>
+</div>
+
+<div style="max-width:1400px;margin:0 auto;padding:0 24px">
+
+<!-- Q1 -->
+<div class="q-card">
+  <div class="q-left">
+    <div class="q-num">1</div>
+    <div class="q-text">在C++中，下列哪个头文件提供了对字符串（string）的支持？</div>
+    <div class="q-options">
+      <div class="q-opt wrong"><span class="label">A</span><span class="code-inline"><span class="pp">#include</span> &lt;cstring&gt;</span></div>
+      <div class="q-opt correct"><span class="label">B</span><span class="code-inline"><span class="pp">#include</span> &lt;string&gt;</span></div>
+      <div class="q-opt wrong"><span class="label">C</span><span class="code-inline"><span class="pp">#include</span> &lt;strlib&gt;</span></div>
+      <div class="q-opt wrong"><span class="label">D</span><span class="code-inline"><span class="pp">#include</span> &lt;strings&gt;</span></div>
+    </div>
+  </div>
+  <div class="q-right">
+    <div class="answer-badge">✓ 答案 B</div>
+    <h3>解析</h3>
+    <div class="analysis">
+      <span class="step">B. <span class="code-inline"><span class="pp">#include</span> &lt;string&gt;</span> → C++ 标准库字符串类所在头文件 ✓</span>
+      <span class="step">A. <span class="code-inline">&lt;cstring&gt;</span> → C 风格字符串函数（strlen, strcpy 等）</span>
+      <span class="step">C. <span class="code-inline">&lt;strlib&gt;</span> → 不存在此头文件 ✗</span>
+      <span class="step">D. <span class="code-inline">&lt;strings&gt;</span> → C++20 才引入，且是大写敏感的 C 风格字符串函数</span>
+      <br><strong>记忆口诀：</strong>用 string 类就 include string，简洁好记。
+    </div>
+  </div>
+</div>
+
+<!-- Q2 -->
+<div class="q-card">
+  <div class="q-left">
+    <div class="q-num">2</div>
+    <div class="q-text">若有 <span class="code-inline"><span class="tp">string</span> s = <span class="st">"Hello"</span>;</span>，则 <span class="code-inline">s.<span class="fn">length</span>()</span> 的返回值是（ ）</div>
+    <div class="q-options">
+      <div class="q-opt wrong"><span class="label">A</span>4</div>
+      <div class="q-opt correct"><span class="label">B</span>5</div>
+      <div class="q-opt wrong"><span class="label">C</span>6</div>
+      <div class="q-opt wrong"><span class="label">D</span>不确定</div>
+    </div>
+  </div>
+  <div class="q-right">
+    <div class="answer-badge">✓ 答案 B</div>
+    <h3>解析</h3>
+    <div class="analysis">
+      <span class="code-inline"><span class="st">"Hello"</span></span> 包含 5 个字符：H-e-l-l-o<br>
+      <span class="step"><span class="code-inline">length()</span> 返回字符串的<strong>字符数</strong>，不含结尾的 <span class="code-inline"><span class="st">'\0'</span></span></span>
+      <span class="step">结果 = <strong>5</strong></span>
+      <br>常见混淆：<span class="code-inline"><span class="st">"Hello"</span></span> 占 6 个字节（H e l l o \0），但 length() 只统计字符数，返回 5。
+    </div>
+  </div>
+</div>
+
+<!-- Q3 -->
+<div class="q-card">
+  <div class="q-left">
+    <div class="q-num">3</div>
+    <div class="q-text">下列哪个函数可以用来获取 C 风格字符串的长度？</div>
+    <div class="q-options">
+      <div class="q-opt wrong"><span class="label">A</span><span class="code-inline"><span class="fn">len</span>()</span></div>
+      <div class="q-opt wrong"><span class="label">B</span><span class="code-inline"><span class="fn">size</span>()</span></div>
+      <div class="q-opt correct"><span class="label">C</span><span class="code-inline"><span class="fn">strlen</span>()</span></div>
+      <div class="q-opt wrong"><span class="label">D</span><span class="code-inline"><span class="fn">length</span>()</span></div>
+    </div>
+  </div>
+  <div class="q-right">
+    <div class="answer-badge">✓ 答案 C</div>
+    <h3>解析</h3>
+    <div class="analysis">
+      <span class="step">C. <span class="code-inline"><span class="fn">strlen</span>()</span> → 获取 C 风格字符串（<span class="code-inline"><span class="tp">const char</span>*</span>）的长度 ✓</span>
+      <span class="step">A. <span class="code-inline"><span class="fn">len</span>()</span> → 不存在的函数 ✗</span>
+      <span class="step">B/D. <span class="code-inline"><span class="fn">size/length</span>()</span> → C++ string 的成员函数，不适用于 C 风格字符串</span>
+      <br><strong>区分：</strong><span class="code-inline"><span class="fn">strlen</span>(s)</span> 用于 C 风格字符串，<span class="code-inline">s.<span class="fn">length</span>()</span> 用于 C++ string 对象。
+    </div>
+  </div>
+</div>
+
+<!-- Q4 -->
+<div class="q-card">
+  <div class="q-left">
+    <div class="q-num">4</div>
+    <div class="q-text">若有 <span class="code-inline"><span class="tp">string</span> s1 = <span class="st">"abc"</span>, s2 = <span class="st">"def"</span>;</span>，则 <span class="code-inline">s1 + s2</span> 的结果是（ ）</div>
+    <div class="q-options">
+      <div class="q-opt correct"><span class="label">A</span><span class="code-inline"><span class="st">"abcdef"</span></span></div>
+      <div class="q-opt wrong"><span class="label">B</span><span class="code-inline"><span class="st">"abc def"</span></span></div>
+      <div class="q-opt wrong"><span class="label">C</span><span class="code-inline"><span class="st">"abc+def"</span></span></div>
+      <div class="q-opt wrong"><span class="label">D</span>编译错误</div>
+    </div>
+  </div>
+  <div class="q-right">
+    <div class="answer-badge">✓ 答案 A</div>
+    <h3>解析</h3>
+    <div class="analysis">
+      C++ string 支持 <span class="code-inline">+</span> 运算符进行字符串<strong>拼接</strong>。<br>
+      <span class="step">s1 = <span class="st">"abc"</span>，s2 = <span class="st">"def"</span></span>
+      <span class="step">s1 + s2 → <strong>"abcdef"</strong></span>
+      <br>B 选项多了空格、C 选项多了加号。<br>
+      <strong>注意：</strong>C 风格字符串（<span class="code-inline"><span class="tp">char</span>*</span>）不能直接用 <span class="code-inline">+</span> 拼接。
+    </div>
+  </div>
+</div>
+
+<!-- Q5 -->
+<div class="q-card">
+  <div class="q-left">
+    <div class="q-num">5</div>
+    <div class="q-text">在C++中，字符串 <span class="code-inline"><span class="st">"123"</span></span> 和字符串 <span class="code-inline"><span class="st">"123 "</span></span>（末尾有空格）进行比较（==）的结果是（ ）</div>
+    <div class="q-options">
+      <div class="q-opt wrong"><span class="label">A</span>true</div>
+      <div class="q-opt correct"><span class="label">B</span>false</div>
+      <div class="q-opt wrong"><span class="label">C</span>编译错误</div>
+      <div class="q-opt wrong"><span class="label">D</span>运行时错误</div>
+    </div>
+  </div>
+  <div class="q-right">
+    <div class="answer-badge">✓ 答案 B</div>
+    <h3>解析</h3>
+    <div class="analysis">
+      <span class="code-inline"><span class="st">"123"</span></span> 和 <span class="code-inline"><span class="st">"123 "</span></span> 长度不同，空格也是字符。<br>
+      <span class="step"><span class="st">"123"</span> → 3个字符：'1','2','3'</span>
+      <span class="step"><span class="st">"123 "</span> → 4个字符：'1','2','3',' '</span>
+      <span class="step">长度不同，== 比较结果 = <strong>false</strong></span>
+      <br>字符串比较是逐字符比较，遇到第一个不同的字符即返回结果。
+    </div>
+  </div>
+</div>
+
+<!-- Q6 -->
+<div class="q-card">
+  <div class="q-left">
+    <div class="q-num">6</div>
+    <div class="q-text">若有 <span class="code-inline"><span class="tp">string</span> s = <span class="st">"Hello"</span>;</span>，则 <span class="code-inline">s[<span class="num">1</span>]</span> 的值是（ ）</div>
+    <div class="q-options">
+      <div class="q-opt wrong"><span class="label">A</span><span class="code-inline"><span class="st">'H'</span></span></div>
+      <div class="q-opt correct"><span class="label">B</span><span class="code-inline"><span class="st">'e'</span></span></div>
+    </div>
+  </div>
+  <div class="q-right">
+    <div class="answer-badge">✓ 答案 B</div>
+    <h3>解析</h3>
+    <div class="analysis">
+      string 下标从 <strong>0 开始</strong>：<br>
+      <span class="step">s[0] = <span class="st">'H'</span>，s[1] = <span class="st">'e'</span>，s[2] = <span class="st">'l'</span>，s[3] = <span class="st">'l'</span>，s[4] = <span class="st">'o'</span></span>
+      <span class="step"><strong>s[1] = 'e'</strong></span>
+      <br><strong>易错点：</strong>下标从 0 开始，不是从 1 开始。
+    </div>
+  </div>
+</div>
+
+<!-- Q7 -->
+<div class="q-card">
+  <div class="q-left">
+    <div class="q-num">7</div>
+    <div class="q-text">对于 <span class="code-inline"><span class="tp">string</span> s = <span class="st">"C++ Programming"</span>;</span>，执行 <span class="code-inline">s.<span class="fn">substr</span>(<span class="num">4</span>, <span class="num">3</span>)</span> 的结果是（ ）</div>
+    <div class="q-options">
+      <div class="q-opt correct"><span class="label">A</span><span class="code-inline"><span class="st">"Pro"</span></span></div>
+      <div class="q-opt wrong"><span class="label">B</span><span class="code-inline"><span class="st">" Pro"</span></span></div>
+      <div class="q-opt wrong"><span class="label">C</span><span class="code-inline"><span class="st">"Prog"</span></span></div>
+      <div class="q-opt wrong"><span class="label">D</span><span class="code-inline"><span class="st">"Pro "</span></span></div>
+    </div>
+  </div>
+  <div class="q-right">
+    <div class="answer-badge">✓ 答案 A</div>
+    <h3>解析</h3>
+    <div class="analysis">
+      <span class="code-inline"><span class="fn">substr</span>(pos, len)</span> 从位置 pos 开始，截取 len 个字符。<br>
+      <span class="step"><span class="st">"C++ Programming"</span> 下标：0='C', 1='+', 2='+', 3=' ', 4='P', 5='r', 6='o', 7='g', ...</span>
+      <span class="step"><span class="code-inline"><span class="fn">substr</span>(4, 3)</span> → 从下标4取3个字符 → <strong>"Pro"</strong></span>
+      <br>B 选项多了一个空格（误把空格算进去）<br>
+      <strong>substr 格式：</strong><span class="code-inline"><span class="fn">substr</span>(起始位置, 字符个数)</span>
+    </div>
+  </div>
+</div>
+
+<!-- Q8 -->
+<div class="q-card">
+  <div class="q-left">
+    <div class="q-num">8</div>
+    <div class="q-text">下列哪个函数用于在 string 对象中查找子串第一次出现的位置？</div>
+    <div class="q-options">
+      <div class="q-opt correct"><span class="label">A</span><span class="code-inline"><span class="fn">find</span>()</span></div>
+      <div class="q-opt wrong"><span class="label">B</span><span class="code-inline"><span class="fn">search</span>()</span></div>
+      <div class="q-opt wrong"><span class="label">C</span><span class="code-inline"><span class="fn">locate</span>()</span></div>
+      <div class="q-opt wrong"><span class="label">D</span><span class="code-inline"><span class="fn">index</span>()</span></div>
+    </div>
+  </div>
+  <div class="q-right">
+    <div class="answer-badge">✓ 答案 A</div>
+    <h3>解析</h3>
+    <div class="analysis">
+      <span class="step">A. <span class="code-inline"><span class="fn">find</span>()</span> → C++ string 标准成员函数 ✓</span>
+      <span class="step">B. <span class="code-inline"><span class="fn">search</span>()</span> → 算法库函数，不直接属于 string</span>
+      <span class="step">C. <span class="code-inline"><span class="fn">locate</span>()</span> → 不存在此函数 ✗</span>
+      <span class="step">D. <span class="code-inline"><span class="fn">index</span>()</span> → 不存在于 string 标准库 ✗</span>
+      <br><strong>find 返回值：</strong>找到返回下标（size_t），找不到返回 <span class="code-inline"><span class="tp">string</span>::<span class="fn">npos</span></span>
+    </div>
+  </div>
+</div>
+
+<!-- Q9 -->
+<div class="q-card">
+  <div class="q-left">
+    <div class="q-num">9</div>
+    <div class="q-text">若 <span class="code-inline"><span class="tp">string</span> s = <span class="st">"aabbaa"</span>;</span>，执行 <span class="code-inline">s.<span class="fn">find</span>(<span class="st">"bb"</span>)</span> 返回的值是（ ）</div>
+    <div class="q-options">
+      <div class="q-opt wrong"><span class="label">A</span>1</div>
+      <div class="q-opt correct"><span class="label">B</span>2</div>
+      <div class="q-opt wrong"><span class="label">C</span>3</div>
+      <div class="q-opt wrong"><span class="label">D</span>4</div>
+    </div>
+  </div>
+  <div class="q-right">
+    <div class="answer-badge">✓ 答案 B</div>
+    <h3>解析</h3>
+    <div class="analysis">
+      <span class="code-inline"><span class="fn">find</span>()</span> 返回子串<strong>首次出现</strong>的下标（从 0 开始）。<br>
+      <span class="step"><span class="st">"aabbaa"</span> 下标：0='a', 1='a', 2='b', 3='b', 4='a', 5='a'</span>
+      <span class="step"><span class="code-inline"><span class="fn">find</span>(<span class="st">"bb"</span>)</span> → "bb" 首次出现在下标 <strong>2</strong></span>
+      <br>A 选项 1 = 从1开始数（错误地从1计数）
+    </div>
+  </div>
+</div>
+
+<!-- Q10 -->
+<div class="q-card">
+  <div class="q-left">
+    <div class="q-num">10</div>
+    <div class="q-text">下列代码片段中，正确的是（ ）</div>
+    <div class="q-options">
+      <div class="q-opt wrong"><span class="label">A</span><span class="code-inline"><span class="tp">string</span> s; s = <span class="st">"Hello"</span>;</span></div>
+      <div class="q-opt wrong"><span class="label">B</span><span class="code-inline"><span class="tp">string</span> s = <span class="st">"Hello"</span>;</span></div>
+      <div class="q-opt wrong"><span class="label">C</span><span class="code-inline"><span class="tp">string</span> s(<span class="st">"Hello"</span>);</span></div>
+      <div class="q-opt correct"><span class="label">D</span>以上都可以</div>
+    </div>
+  </div>
+  <div class="q-right">
+    <div class="answer-badge">✓ 答案 D</div>
+    <h3>解析</h3>
+    <div class="analysis">
+      C++ string 有三种初始化方式，全部合法：<br>
+      <span class="step">A. 先定义后赋值：<span class="code-inline"><span class="tp">string</span> s; s = <span class="st">"Hello"</span>;</span> ✓</span>
+      <span class="step">B. 定义时初始化：<span class="code-inline"><span class="tp">string</span> s = <span class="st">"Hello"</span>;</span> ✓</span>
+      <span class="step">C. 构造函数方式：<span class="code-inline"><span class="tp">string</span> s(<span class="st">"Hello"</span>);</span> ✓</span>
+    </div>
+  </div>
+</div>
+
+<!-- Q11 -->
+<div class="q-card">
+  <div class="q-left">
+    <div class="q-num">11</div>
+    <div class="q-text">对于 <span class="code-inline"><span class="tp">string</span> s = <span class="st">"abcdef"</span>;</span>，执行 <span class="code-inline">s.<span class="fn">replace</span>(<span class="num">2</span>, <span class="num">3</span>, <span class="st">"XYZ"</span>)</span> 后，s 的值是（ ）</div>
+    <div class="q-options">
+      <div class="q-opt correct"><span class="label">A</span><span class="code-inline"><span class="st">"abXYZf"</span></span></div>
+      <div class="q-opt wrong"><span class="label">B</span><span class="code-inline"><span class="st">"abXYZef"</span></span></div>
+      <div class="q-opt wrong"><span class="label">C</span><span class="code-inline"><span class="st">"XYZdef"</span></span></div>
+      <div class="q-opt wrong"><span class="label">D</span><span class="code-inline"><span class="st">"abXYZ"</span></span></div>
+    </div>
+  </div>
+  <div class="q-right">
+    <div class="answer-badge">✓ 答案 A</div>
+    <h3>解析</h3>
+    <div class="analysis">
+      <span class="code-inline"><span class="fn">replace</span>(pos, len, str)</span>：从位置 pos 开始，删除 len 个字符，然后插入 str。<br>
+      <span class="step"><span class="st">"abcdef"</span> 下标：0='a', 1='b', 2='c', 3='d', 4='e', 5='f'</span>
+      <span class="step"><span class="code-inline"><span class="fn">replace</span>(2, 3, <span class="st">"XYZ"</span>)</span> → 从下标2删除3个字符（c,d,e），插入 "XYZ"</span>
+      <span class="step">结果：<strong>"abXYZf"</strong></span>
+      <br><strong>replace 格式：</strong><span class="code-inline"><span class="fn">replace</span>(起始位置, 删除个数, 替换字符串)</span>
+    </div>
+  </div>
+</div>
+
+<!-- Q12 -->
+<div class="q-card">
+  <div class="q-left">
+    <div class="q-num">12</div>
+    <div class="q-text">C++代码 <span class="code-inline"><span class="tp">string</span> s = <span class="st">"GESP考试"</span>;</span>，s 占据的字节数是（ ）</div>
+    <div class="q-options">
+      <div class="q-opt wrong"><span class="label">A</span>10</div>
+      <div class="q-opt wrong"><span class="label">B</span>8</div>
+      <div class="q-opt wrong"><span class="label">C</span>8或10</div>
+      <div class="q-opt correct"><span class="label">D</span>取决于计算机采用什么编码</div>
+    </div>
+  </div>
+  <div class="q-right">
+    <div class="answer-badge">✓ 答案 D</div>
+    <h3>解析</h3>
+    <div class="analysis">
+      中文字符在不同编码下占不同字节数：<br>
+      <span class="step">ASCII（英文/符号）：每个字符占 <strong>1 字节</strong></span>
+      <span class="step">GBK 编码：每个中文字占 <strong>2 字节</strong></span>
+      <span class="step">UTF-8 编码："GESP"=4字节 + "考试"=6字节（每汉字3字节）= <strong>10字节</strong></span>
+      <br><strong>字节数取决于编码方式。</strong>
+    </div>
+  </div>
+</div>
+
+<!-- Q13 -->
+<div class="q-card">
+  <div class="q-left">
+    <div class="q-num">13</div>
+    <div class="q-text">字符串 <span class="code-inline"><span class="st">"Gesp考试"</span></span>，字符数是（ ）</div>
+    <div class="q-options">
+      <div class="q-opt wrong"><span class="label">A</span>10</div>
+      <div class="q-opt wrong"><span class="label">B</span>8</div>
+      <div class="q-opt correct"><span class="label">C</span>6</div>
+    </div>
+  </div>
+  <div class="q-right">
+    <div class="answer-badge">✓ 答案 C</div>
+    <h3>解析</h3>
+    <div class="analysis">
+      <span class="code-inline"><span class="st">"Gesp考试"</span></span> 字符拆解：G-e-s-p-考-试<br>
+      <span class="step">英文字母：G, e, s, p → <strong>4 个</strong></span>
+      <span class="step">中文字符：考, 试 → <strong>2 个</strong></span>
+      <span class="step">总字符数 = <strong>6</strong></span>
+      <br>A 选项 10 = UTF-8 字节数，B 选项 8 = GBK 字节数<br>
+      <strong>字符数 ≠ 字节数！</strong>这是本题的核心考点。
+    </div>
+  </div>
+</div>
+
+<!-- Q14 -->
+<div class="q-card">
+  <div class="q-left">
+    <div class="q-num">14</div>
+    <div class="q-text">下面程序最后能够得到 <span class="code-inline"><span class="st">"HelloC++"</span></span> 的是（ ）</div>
+    <div class="code-block"><span class="tp">string</span> str = <span class="st">"Hello"</span>;
+str.<span class="fn">replace</span>(<span class="num">0</span>, <span class="num">5</span>, <span class="st">"HelloC++"</span>);
+<span class="fn">cout</span> <span class="op">&lt;&lt;</span> str;</div>
+    <div class="code-block"><span class="tp">string</span> str = <span class="st">"Hello"</span>;
+str.<span class="fn">replace</span>(<span class="num">5</span>, <span class="num">5</span>, <span class="st">"C++"</span>);
+<span class="fn">cout</span> <span class="op">&lt;&lt;</span> str;</div>
+    <div class="code-block"><span class="tp">string</span> str = <span class="st">"Hello"</span>;
+str.<span class="fn">replace</span>(<span class="num">1</span>, <span class="num">5</span>, <span class="st">"C++"</span>);
+<span class="fn">cout</span> <span class="op">&lt;&lt;</span> str;</div>
+    <div class="code-block"><span class="tp">string</span> str = <span class="st">"HelloC++World"</span>;
+str.<span class="fn">replace</span>(<span class="num">5</span>, <span class="num">5</span>, <span class="st">""</span>);
+<span class="fn">cout</span> <span class="op">&lt;&lt;</span> str;</div>
+    <div class="q-options">
+      <div class="q-opt wrong"><span class="label">A</span>第1个程序</div>
+      <div class="q-opt correct"><span class="label">B</span>第2个程序</div>
+      <div class="q-opt wrong"><span class="label">C</span>第3个程序</div>
+      <div class="q-opt wrong"><span class="label">D</span>第4个程序</div>
+    </div>
+  </div>
+  <div class="q-right">
+    <div class="answer-badge">✓ 答案 B</div>
+    <h3>解析</h3>
+    <div class="analysis">
+      逐一分析各程序：<br>
+      <span class="step">A. replace(0,5,"HelloC++") → "Hello"长度5，从0删5个=删全部，插"HelloC++" → "HelloC++"（碰巧对，但非目标思路）</span>
+      <span class="step">B. replace(5,5,"C++") → "Hello"长度5，下标5指向末尾，追加"C++" → "HelloC++" ✓</span>
+      <span class="step">C. replace(1,5,"C++") → 从下标1删5个（"ello"），剩"H"，插"C++" → "HC++" ✗</span>
+      <span class="step">D. replace(5,5,"") → "HelloC++World"，从下标5删5个字符（C++），插空 → "HelloWorld" ✗</span>
+      <br>选 B。
+    </div>
+  </div>
+</div>
+
+<!-- Q15 -->
+<div class="q-card">
+  <div class="q-left">
+    <div class="q-num">15</div>
+    <div class="q-text">对于 <span class="code-inline"><span class="tp">string</span> s = <span class="st">"abcdefg"</span>;</span>，执行 <span class="code-inline">s.<span class="fn">erase</span>(<span class="num">2</span>, <span class="num">3</span>);</span> 后，s 的值是（ ）</div>
+    <div class="q-options">
+      <div class="q-opt correct"><span class="label">A</span><span class="code-inline"><span class="st">"abfg"</span></span></div>
+      <div class="q-opt wrong"><span class="label">B</span><span class="code-inline"><span class="st">"abefg"</span></span></div>
+      <div class="q-opt wrong"><span class="label">C</span><span class="code-inline"><span class="st">"abcg"</span></span></div>
+      <div class="q-opt wrong"><span class="label">D</span><span class="code-inline"><span class="st">"abdefg"</span></span></div>
+    </div>
+  </div>
+  <div class="q-right">
+    <div class="answer-badge">✓ 答案 A</div>
+    <h3>解析</h3>
+    <div class="analysis">
+      <span class="code-inline"><span class="fn">erase</span>(pos, len)</span>：从位置 pos 开始，删除 len 个字符。<br>
+      <span class="step"><span class="st">"abcdefg"</span> 下标：0='a', 1='b', 2='c', 3='d', 4='e', 5='f', 6='g'</span>
+      <span class="step"><span class="code-inline"><span class="fn">erase</span>(2, 3)</span> → 从下标2删除3个字符（c,d,e）</span>
+      <span class="step">结果：<strong>"abfg"</strong></span>
+      <br><strong>erase 格式：</strong><span class="code-inline"><span class="fn">erase</span>(起始位置, 删除个数)</span>
+    </div>
+  </div>
+</div>
+
+<!-- Q16 -->
+<div class="q-card">
+  <div class="q-left">
+    <div class="q-num">16</div>
+    <div class="q-text">C++中 string 的 == 运算符比较的是字符串的内存地址，而非内容。</div>
+    <div class="judge-opts">
+      <div class="judge-opt wrong">✗ 正确</div>
+      <div class="judge-opt correct">✓ 错误</div>
+    </div>
+  </div>
+  <div class="q-right">
+    <div class="answer-badge">✓ 答案 ✗ 错误</div>
+    <h3>解析</h3>
+    <div class="analysis">
+      <strong>这道题的说法是错误的。</strong><br>
+      <span class="step">string 的 == 运算符比较的是字符串的<strong>内容</strong>，不是内存地址</span>
+      <span class="step">即使两个 string 对象地址不同，只要内容相同，== 就返回 true</span>
+      <br><strong>区分：</strong><br>
+      <span class="code-inline"><span class="tp">string</span> a = <span class="st">"abc"</span>, b = <span class="st">"abc"</span>;</span><br>
+      a == b → <strong>true</strong>（比较内容）<br>
+      &a == &b → <strong>false</strong>（比较地址）
+    </div>
+  </div>
+</div>
+
+<!-- Q17 -->
+<div class="q-card">
+  <div class="q-left">
+    <div class="q-num">17</div>
+    <div class="q-text">string 的 <span class="code-inline"><span class="fn">substr</span>(<span class="num">1</span>, <span class="num">3</span>)</span> 返回从下标1开始的3个字符的子串。</div>
+    <div class="judge-opts">
+      <div class="judge-opt correct">✓ 正确</div>
+      <div class="judge-opt wrong">✗ 错误</div>
+    </div>
+  </div>
+  <div class="q-right">
+    <div class="answer-badge">✓ 答案 ✓ 正确</div>
+    <h3>解析</h3>
+    <div class="analysis">
+      <span class="code-inline"><span class="fn">substr</span>(pos, len)</span> 的参数含义：<br>
+      <span class="step">pos：起始位置（下标，从0开始）</span>
+      <span class="step">len：截取字符的<strong>个数</strong></span>
+      <span class="step"><span class="code-inline"><span class="fn">substr</span>(1, 3)</span> → 从下标1开始，取3个字符 ✓</span>
+      <br>举例：<span class="code-inline"><span class="st">"Hello"</span></span> 调用 substr(1,3) → "ell"
+    </div>
+  </div>
+</div>
+
+<!-- Q18 -->
+<div class="q-card">
+  <div class="q-left">
+    <div class="q-num">18</div>
+    <div class="q-text"><span class="code-inline"><span class="tp">string</span>(<span class="st">"hello"</span>) == <span class="st">"hello"</span></span> 的比较结果为 true。</div>
+    <div class="judge-opts">
+      <div class="judge-opt correct">✓ 正确</div>
+      <div class="judge-opt wrong">✗ 错误</div>
+    </div>
+  </div>
+  <div class="q-right">
+    <div class="answer-badge">✓ 答案 ✓ 正确</div>
+    <h3>解析</h3>
+    <div class="analysis">
+      <strong>这个说法是正确的。</strong><br>
+      <span class="step"><span class="code-inline"><span class="tp">string</span>(<span class="st">"hello"</span>)</span> 创建了一个 string 对象</span>
+      <span class="step">右侧 <span class="code-inline"><span class="st">"hello"</span></span> 在比较时会<strong>自动转换</strong>为 string 对象</span>
+      <span class="step">两边内容相同，== 比较结果为 <strong>true</strong></span>
+      <br>C++ 重载了 == 运算符，使其比较字符串内容，而非指针地址。
+    </div>
+  </div>
+</div>
+
+<!-- Q19 -->
+<div class="q-card">
+  <div class="q-left">
+    <div class="q-num">19</div>
+    <div class="q-text">C++中，string 类型的字符串末尾一定包含 <span class="code-inline"><span class="st">'\0'</span></span> 字符。</div>
+    <div class="judge-opts">
+      <div class="judge-opt wrong">✗ 正确</div>
+      <div class="judge-opt correct">✓ 错误</div>
+    </div>
+  </div>
+  <div class="q-right">
+    <div class="answer-badge">✓ 答案 ✗ 错误</div>
+    <h3>解析</h3>
+    <div class="analysis">
+      <strong>这个说法是错误的。</strong><br>
+      <span class="step">C++ string 是<strong>高级字符串类</strong>，内部自己管理内存，不依赖 <span class="code-inline"><span class="st">'\0'</span></span> 作为结束标记</span>
+      <span class="step">string 用 <span class="code-inline"><span class="fn">length</span>()</span> / <span class="code-inline"><span class="fn">size</span>()</span> 记录长度，不需要用 <span class="code-inline"><span class="st">'\0'</span></span> 判断结尾</span>
+      <br><strong>区分：</strong><br>
+      C++ string：不需要 '\0' 结尾，长度由对象属性决定<br>
+      C 风格字符串：必须以 <span class="code-inline"><span class="st">'\0'</span></span> 结尾，否则无法判断长度
+    </div>
+  </div>
+</div>
+
+<!-- Q20 -->
+<div class="q-card">
+  <div class="q-left">
+    <div class="q-num">20</div>
+    <div class="q-text">string 对象的 <span class="code-inline"><span class="fn">size</span>()</span> 和 <span class="code-inline"><span class="fn">length</span>()</span> 方法返回的值总是相同的。</div>
+    <div class="judge-opts">
+      <div class="judge-opt correct">✓ 正确</div>
+      <div class="judge-opt wrong">✗ 错误</div>
+    </div>
+  </div>
+  <div class="q-right">
+    <div class="answer-badge">✓ 答案 ✓ 正确</div>
+    <h3>解析</h3>
+    <div class="analysis">
+      <strong>这个说法是正确的。</strong><br>
+      <span class="step"><span class="code-inline"><span class="fn">size</span>()</span> 和 <span class="code-inline"><span class="fn">length</span>()</span> 在 C++ string 中是<strong>完全等价</strong>的</span>
+      <span class="step">length() 是 string 类为了符合人类习惯而额外提供的</span>
+      <span class="step">size() 是从 STL 容器继承来的接口，两者底层调用的<strong>是同一个函数</strong></span>
+      <br>所以 <span class="code-inline">s.<span class="fn">size</span>() == s.<span class="fn">length</span>()</span> 恒成立。
+    </div>
+  </div>
+</div>
+
+</div>
+</body>
+</html>
