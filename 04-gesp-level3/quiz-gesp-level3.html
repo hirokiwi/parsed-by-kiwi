@@ -9,10 +9,10 @@
 
   /* ===== 毛玻璃暗色主题 ===== */
   :root {
-    --bg-deep: #1a1a26;
-    --glass-bg: rgba(30, 32, 46, 0.5);
+    --bg-deep: #242433;
+    --glass-bg: rgba(36, 38, 54, 0.45);
     --glass-border: rgba(255, 255, 255, 0.1);
-    --glass-hover: rgba(36, 38, 56, 0.65);
+    --glass-hover: rgba(42, 44, 62, 0.6);
     --accent: #f97316;
     --accent-light: #fb923c;
     --accent-glow: rgba(249, 115, 22, 0.2);
@@ -25,7 +25,7 @@
     --text-primary: #f1f5f9;
     --text-body: #e2e8f0;
     --text-muted: #94a3b8;
-    --code-bg: rgba(22, 24, 36, 0.8);
+    --code-bg: rgba(28, 30, 44, 0.8);
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -70,7 +70,7 @@
   /* ===== 主容器 ===== */
   .container {
     position: relative; z-index: 1;
-    max-width: 1400px; margin: 0 auto; padding: 0 24px 80px;
+    width: 100%; max-width: 100%; margin: 0 auto; padding: 0 32px 80px;
   }
 
   /* ===== Header 毛玻璃 ===== */
@@ -103,10 +103,7 @@
   /* ===== 题目卡片 毛玻璃 ===== */
   .q-card {
     position: relative;
-    display: grid; grid-template-columns: 1fr 1fr; gap: 0;
-    margin-bottom: 1px;
-    border-radius: 16px;
-    overflow: hidden;
+    margin-bottom: 0;
   }
   .q-card-inner {
     position: relative; z-index: 1;
@@ -114,7 +111,6 @@
     backdrop-filter: blur(20px) saturate(1.1);
     -webkit-backdrop-filter: blur(20px) saturate(1.1);
     border: 1px solid var(--glass-border);
-    border-radius: 16px;
     display: grid; grid-template-columns: 1fr 1fr;
     transition: all 0.3s ease;
   }
