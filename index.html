@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>C++ 指针与引用 · 互动教学</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=Fira+Code:wght@400;500&display=swap');
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #1a1a26;
+    --card-bg: rgba(30, 32, 46, 0.6);
+    --border: rgba(255, 255, 255, 0.08);
+    --text: #e2e8f0;
+    --text-dim: #94a3b8;
+    --text-dimmer: #64748b;
+    --orange: #f97316;
+    --orange-glow: rgba(249, 115, 22, 0.25);
+    --green: #4ade80;
+    --red: #f87171;
+    --blue: #60a5fa;
+    --purple: #c084fc;
+    --yellow: #fbbf24;
+    --code-bg: #1e1e1e;
+    --code-keyword: #569cd6;
+    --code-num: #b5cea8;
+    --code-str: #ce9178;
+    --code-comment: #6a9955;
+    --code-func: #5b6abf;
+    --code-pre: #c586c0;
+    --code-var: #9cdcfe;
+    --font-code: 'Fira Code', monospace;
+    --font-body: 'Noto Sans SC', sans-serif;
+    --sidebar-w: 220px;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 20% 20%, rgba(249,115,22,0.08) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 80%, rgba(96,165,250,0.06) 0%, transparent 50%),
+      radial-gradient(ellipse at 60% 40%, rgba(192,132,252,0.04) 0%, transparent 40%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.015'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/g%3E%3C/g%3E%3C/g%3E%3C/g%3E%3C/g%3E%3C/g%3E%3C/g%3E%3C/g%3E%3C/g%3E%3C/g%3E%3C/g%3E%3C/g%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── LEFT SIDEBAR ── */
+  .sidebar {
+    position: fixed;
+    left: 0; top: 0; bottom: 0;
+    width: var(--sidebar-w);
+    background: rgba(22, 24, 36, 0.97);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border-right: 1px solid var(--border);
+    z-index: 300;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255,255,255,0.08) transparent;
+  }
+  .sidebar::-webkit-scrollbar { width: 4px; }
+  .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+
+  .sidebar-inner { padding: 20px 0 40px; }
+
+  .sidebar-logo {
+    display: flex; align-items: center; gap: 8px;
+    padding: 0 18px 16px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 8px;
+  }
+  .sidebar-logo-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--orange);
+    box-shadow: 0 0 8px var(--orange);
+    flex-shrink: 0;
+  }
+  .sidebar-logo-text {
+    font-size: 12px; font-weight: 500;
+    color: var(--text-dim); letter-spacing: 0.3px;
+  }
+
+  .sidebar-section-title {
+    font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase;
+    color: var(--text-dimmer); padding: 12px 18px 6px;
+  }
+
+  .sidebar-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 18px;
+    font-size: 13px; font-weight: 400;
+    color: var(--text-dimmer);
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+    border-left: 3px solid transparent;
+  }
+  .sidebar-item:hover {
+    color: var(--text);
+    background: rgba(255,255,255,0.04);
+    border-left-color: rgba(255,255,255,0.1);
+  }
+  .sidebar-item.active {
+    color: var(--orange);
+    background: var(--orange-glow);
+    border-left-color: var(--orange);
+    font-weight: 500;
+  }
+  .sidebar-item .s-icon { font-size: 14px; flex-shrink: 0; width: 22px; text-align: center; }
+  .sidebar-item .s-num { font-size: 10px; color: var(--text-dimmer); min-width: 20px; }
+  .sidebar-item.active .s-num { color: var(--orange); }
+
+  .sidebar-divider { height: 1px; background: var(--border); margin: 10px 18px; }
+
+  .sidebar-progress { padding: 12px 18px 0; }
+  .sidebar-progress-label {
+    font-size: 10px; color: var(--text-dimmer); letter-spacing: 1px;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .sidebar-progress-bar {
+    height: 3px; background: rgba(255,255,255,0.06);
+    border-radius: 2px; overflow: hidden;
+  }
+  .sidebar-progress-fill {
+    height: 100%; background: var(--orange);
+    border-radius: 2px; transition: width 0.4s ease; width: 0%;
+  }
+
+  /* ── MAIN CONTENT ── */
+  .main {
+    margin-left: var(--sidebar-w);
+    position: relative; z-index: 1;
+  }
+
+  /* ── Header ── */
+  .page-header {
+    position: sticky; top: 0; z-index: 200;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    background: rgba(26,26,38,0.85);
+    border-bottom: 1px solid var(--border);
+    padding: 0 40px;
+    height: 60px;
+    display: flex; align-items: center;
+    gap: 12px;
+  }
+  .page-header .logo-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--orange);
+    box-shadow: 0 0 12px var(--orange);
+    flex-shrink: 0;
+  }
+  .page-header h1 { font-size: 15px; font-weight: 500; color: var(--text); letter-spacing: 0.5px; }
+  .page-header .badge {
+    margin-left: auto;
+    font-size: 11px; font-weight: 500;
+    color: var(--orange); background: var(--orange-glow);
+    border: 1px solid rgba(249,115,22,0.3);
+    padding: 3px 10px; border-radius: 20px; letter-spacing: 0.5px;
+  }
+
+  /* ── Hero ── */
+  .hero {
+    padding: 80px 40px 60px;
+    text-align: center;
+  }
+  .hero-label {
+    display: inline-block;
+    font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--orange); background: var(--orange-glow);
+    border: 1px solid rgba(249,115,22,0.25);
+    padding: 4px 14px; border-radius: 20px; margin-bottom: 20px;
+  }
+  .hero h2 {
+    font-size: clamp(32px, 5vw, 52px); font-weight: 700;
+    line-height: 1.2; margin-bottom: 16px;
+    background: linear-gradient(135deg, #f1f5f9 30%, #94a3b8);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .hero h2 span { color: var(--orange); -webkit-text-fill-color: var(--orange); }
+  .hero > p { font-size: 17px; color: var(--text-dim); margin: 0 auto 40px; line-height: 1.8; max-width: 600px; }
+  .hero-tags { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  .tag {
+    font-size: 12px; padding: 5px 14px; border-radius: 20px; font-weight: 500;
+    border: 1px solid var(--border); background: var(--card-bg);
+    backdrop-filter: blur(10px); color: var(--text-dim);
+  }
+  .tag.active { border-color: rgba(249,115,22,0.4); color: var(--orange); background: var(--orange-glow); }
+
+  /* ── Section ── */
+  .section { padding: 20px 40px 60px; }
+  .section-label {
+    font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--orange); margin-bottom: 8px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .section-label::after {
+    content: ''; flex: 1; height: 1px;
+    background: linear-gradient(to right, rgba(249,115,22,0.3), transparent);
+    max-width: 80px;
+  }
+  .section h3 { font-size: clamp(22px, 3vw, 30px); font-weight: 700; margin-bottom: 8px; color: var(--text); }
+  .section > p { color: var(--text-dim); font-size: 15px; margin-bottom: 28px; max-width: 680px; }
+
+  /* ── Card ── */
+  .card {
+    background: var(--card-bg);
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--border);
+    padding: 32px; margin-bottom: 16px;
+    transition: border-color 0.3s;
+  }
+  .card:hover { border-color: rgba(249,115,22,0.2); }
+  .card h4 { font-size: 16px; font-weight: 600; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+  .card h4 .icon {
+    width: 28px; height: 28px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; flex-shrink: 0;
+  }
+  .card h4 .icon.pointer { background: rgba(96,165,250,0.15); color: var(--blue); }
+  .card h4 .icon.ref { background: rgba(74,222,128,0.15); color: var(--green); }
+  .card h4 .icon.swap { background: rgba(251,191,36,0.15); color: var(--yellow); }
+
+  /* ── Memory scene ── */
+  .memory-scene {
+    background: rgba(0,0,0,0.25);
+    border: 1px solid var(--border); border-radius: 12px;
+    padding: 32px; margin: 20px 0;
+  }
+  .scene-label {
+    font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase;
+    color: var(--text-dimmer); margin-bottom: 20px;
+  }
+
+  /* Memory boxes */
+  .mem-layout { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; margin: 16px 0; }
+  .mem-box {
+    border: 2px solid var(--border); border-radius: 10px;
+    padding: 16px 20px; min-width: 140px; text-align: center;
+    transition: all 0.5s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  .mem-box.var { border-color: rgba(96,165,250,0.4); background: rgba(96,165,250,0.06); }
+  .mem-box.ptr { border-color: rgba(249,115,22,0.4); background: rgba(249,115,22,0.06); }
+  .mem-box.ref-box { border-color: rgba(74,222,128,0.4); background: rgba(74,222,128,0.06); }
+  .mem-box.highlight { transform: scale(1.06); box-shadow: 0 0 30px rgba(249,115,22,0.4); border-color: var(--orange); }
+  .mem-box .addr-label { font-size: 10px; letter-spacing: 1px; color: var(--text-dimmer); margin-bottom: 6px; text-transform: uppercase; }
+  .mem-box .var-name { font-family: var(--font-code); font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+  .mem-box .var-val { font-family: var(--font-code); font-size: 22px; font-weight: 700; }
+  .mem-box.var .var-val { color: var(--blue); }
+  .mem-box.ptr .var-val { color: var(--orange); }
+  .mem-box.ref-box .var-val { color: var(--green); }
+  .mem-box .type-tag { font-size: 10px; padding: 2px 8px; border-radius: 4px; margin-top: 8px; display: inline-block; font-family: var(--font-code); }
+  .mem-box.var .type-tag { background: rgba(96,165,250,0.15); color: var(--blue); }
+  .mem-box.ptr .type-tag { background: rgba(249,115,22,0.15); color: var(--orange); }
+  .mem-box.ref-box .type-tag { background: rgba(74,222,128,0.15); color: var(--green); }
+  .mem-arrow { font-size: 28px; color: var(--text-dimmer); flex-shrink: 0; transition: color 0.3s; }
+  .mem-arrow.arrow2 { color: var(--text-dimmer); opacity: 0.5; font-size: 20px; }
+  .addr-display { font-family: var(--font-code); font-size: 11px; color: var(--text-dimmer); margin-top: 6px; letter-spacing: 0.5px; }
+  .ptr-target {
+    border: 2px dashed rgba(249,115,22,0.35); border-radius: 10px;
+    padding: 16px 20px; min-width: 120px; text-align: center;
+    background: rgba(249,115,22,0.04); transition: all 0.5s;
+  }
+  .ptr-target.highlight { border-color: var(--orange); background: rgba(249,115,22,0.12); }
+  .ptr-target .addr-label { font-size: 10px; letter-spacing: 1px; color: var(--text-dimmer); margin-bottom: 6px; }
+  .ptr-target .var-val { font-family: var(--font-code); font-size: 20px; font-weight: 700; color: var(--blue); }
+  .dashed-arrow { display: flex; align-items: center; gap: 8px; color: var(--text-dimmer); font-size: 13px; font-family: var(--font-code); }
+  .dashed-arrow::before, .dashed-arrow::after { content: ''; flex: 1; height: 1px; background: repeating-linear-gradient(to right, var(--text-dimmer) 0, var(--text-dimmer) 4px, transparent 4px, transparent 8px); opacity: 0.4; }
+  .dashed-arrow.active { color: var(--orange); }
+  .dashed-arrow.active::before, .dashed-arrow.active::after { background: repeating-linear-gradient(to right, var(--orange) 0, var(--orange) 4px, transparent 4px, transparent 8px); opacity: 1; }
+
+  /* ── Code block ── */
+  .code-block { background: var(--code-bg); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; overflow: hidden; margin: 16px 0; font-family: var(--font-code); font-size: 13px; line-height: 1.8; }
+  .code-header { display: flex; align-items: center; gap: 8px; padding: 10px 16px; background: rgba(255,255,255,0.03); border-bottom: 1px solid rgba(255,255,255,0.05); }
+  .code-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .code-dot.r { background: #ff5f57; }
+  .code-dot.y { background: #febc2e; }
+  .code-dot.g { background: #28c840; }
+  .code-title { font-size: 11px; color: var(--text-dimmer); margin-left: 8px; }
+  .code-body { padding: 20px; overflow-x: auto; }
+  .code-line { display: flex; gap: 16px; padding: 2px 8px; border-radius: 4px; transition: background 0.3s; }
+  .code-line.active { background: rgba(249,115,22,0.12); }
+  .code-line .ln { color: var(--text-dimmer); min-width: 24px; text-align: right; user-select: none; font-size: 12px; }
+  .code-line.active .ln { color: var(--orange); }
+  .code-line .src { white-space: pre; }
+
+  .kwd { color: var(--code-keyword); }
+  .num { color: var(--code-num); }
+  .str { color: var(--code-str); }
+  .cmt { color: var(--code-comment); font-style: italic; }
+  .fn { color: var(--code-func); }
+  .pre { color: var(--code-pre); }
+  .var { color: var(--code-var); }
+  .op { color: var(--text-dim); }
+
+  .hl-orange { background: rgba(249,115,22,0.2); border-radius: 3px; padding: 1px 3px; color: var(--orange); }
+  .hl-blue { background: rgba(96,165,250,0.2); border-radius: 3px; padding: 1px 3px; color: var(--blue); }
+  .hl-green { background: rgba(74,222,128,0.2); border-radius: 3px; padding: 1px 3px; color: var(--green); }
+  .hl-yellow { background: rgba(251,191,36,0.2); border-radius: 3px; padding: 1px 3px; color: var(--yellow); }
+  .hl-purple { background: rgba(192,132,252,0.2); border-radius: 3px; padding: 1px 3px; color: var(--purple); }
+
+  /* ── Button ── */
+  .run-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--orange); color: #fff; border: none;
+    padding: 10px 24px; border-radius: 8px;
+    font-size: 13px; font-weight: 600; cursor: pointer;
+    font-family: var(--font-body); transition: all 0.2s;
+    box-shadow: 0 4px 15px rgba(249,115,22,0.3); margin-top: 16px;
+  }
+  .run-btn:hover { background: #ea6a0a; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(249,115,22,0.4); }
+  .run-btn:active { transform: translateY(0); }
+  .run-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  /* ── Output ── */
+  .output-box { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 14px 18px; font-family: var(--font-code); font-size: 13px; margin-top: 12px; min-height: 40px; }
+  .output-box .prompt { color: var(--text-dimmer); }
+  .output-box .out-val { color: var(--green); font-weight: 600; margin-left: 4px; }
+  .output-line { display: flex; align-items: flex-start; gap: 10px; margin: 4px 0; }
+
+  /* ── Step dots ── */
+  .step-dots { display: flex; gap: 6px; justify-content: center; margin: 14px 0; }
+  .step-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.1); transition: all 0.3s; cursor: pointer; }
+  .step-dot.active { background: var(--orange); box-shadow: 0 0 8px var(--orange); width: 24px; border-radius: 4px; }
+  .step-dot.done { background: rgba(249,115,22,0.4); }
+
+  /* ── Callout ── */
+  .callout { display: flex; gap: 14px; background: rgba(249,115,22,0.06); border-left: 3px solid var(--orange); border-radius: 0 8px 8px 0; padding: 14px 18px; margin: 16px 0; font-size: 14px; color: var(--text-dim); }
+  .callout .icon { font-size: 18px; flex-shrink: 0; }
+  .callout.green { background: rgba(74,222,128,0.06); border-left-color: var(--green); }
+  .callout.blue { background: rgba(96,165,250,0.06); border-left-color: var(--blue); }
+
+  /* ── Two col ── */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 768px) { .two-col { grid-template-columns: 1fr; } }
+
+  /* ── Swap tabs ── */
+  .swap-tabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+  .swap-tab { padding: 8px 18px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; border: 1px solid var(--border); background: var(--card-bg); color: var(--text-dim); transition: all 0.2s; font-family: var(--font-body); }
+  .swap-tab.active { border-color: var(--orange); color: var(--orange); background: var(--orange-glow); }
+  .swap-tab:hover:not(.active) { border-color: rgba(255,255,255,0.15); color: var(--text); }
+  .swap-panel { display: none; }
+  .swap-panel.active { display: block; }
+  .result-chip { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 8px; font-family: var(--font-code); font-size: 14px; font-weight: 600; margin: 8px 4px; }
+  .result-chip.fail { background: rgba(248,113,113,0.12); border: 1px solid rgba(248,113,113,0.3); color: var(--red); }
+  .result-chip.ok { background: rgba(74,222,128,0.12); border: 1px solid rgba(74,222,128,0.3); color: var(--green); }
+  .result-chip .emoji { font-size: 16px; }
+
+  /* ── Pitfall ── */
+  .pitfall-card { background: rgba(248,113,113,0.05); border: 1px solid rgba(248,113,113,0.2); border-radius: 10px; padding: 20px 24px; margin: 12px 0; }
+  .pitfall-card h5 { font-size: 14px; font-weight: 600; color: var(--red); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+  .pitfall-card p { font-size: 13px; color: var(--text-dim); }
+  .pitfall-card .code-inline { font-family: var(--font-code); font-size: 12px; background: rgba(0,0,0,0.3); padding: 2px 8px; border-radius: 4px; color: var(--red); }
+
+  /* ── Table ── */
+  .cmp-table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 14px; }
+  .cmp-table th { text-align: left; padding: 14px 18px; background: rgba(255,255,255,0.03); border-bottom: 1px solid var(--border); font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-dimmer); }
+  .cmp-table td { padding: 14px 18px; border-bottom: 1px solid rgba(255,255,255,0.04); vertical-align: top; }
+  .cmp-table tr:last-child td { border-bottom: none; }
+  .cmp-table tr:hover td { background: rgba(255,255,255,0.02); }
+  .cmp-table .dim { color: var(--text-dimmer); }
+  .cmp-table .tag-p { display: inline-block; padding: 2px 10px; border-radius: 4px; background: rgba(96,165,250,0.15); color: var(--blue); font-family: var(--font-code); font-size: 12px; }
+  .cmp-table .tag-r { display: inline-block; padding: 2px 10px; border-radius: 4px; background: rgba(74,222,128,0.15); color: var(--green); font-family: var(--font-code); font-size: 12px; }
+
+  /* ── Arith ── */
+  .arith-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin: 16px 0; }
+  .arith-card { background: rgba(0,0,0,0.2); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+  .arith-card .arith-expr { font-family: var(--font-code); font-size: 15px; color: var(--orange); margin-bottom: 8px; }
+  .arith-card .arith-desc { font-size: 13px; color: var(--text-dim); }
+
+  /* ── Flow ── */
+  .flow-row { display: flex; align-items: center; gap: 12px; justify-content: center; margin: 20px 0; flex-wrap: wrap; }
+  .flow-node { padding: 12px 20px; border-radius: 8px; border: 1px solid var(--border); background: var(--card-bg); font-size: 13px; font-family: var(--font-code); text-align: center; min-width: 100px; transition: all 0.3s; }
+  .flow-node.cur { border-color: var(--orange); background: var(--orange-glow); color: var(--orange); }
+  .flow-node.done { border-color: rgba(74,222,128,0.4); background: rgba(74,222,128,0.08); color: var(--green); }
+  .flow-arrow { font-size: 20px; color: var(--text-dimmer); }
+
+  /* ── Bottom nav ── */
+  .bottom-nav { text-align: center; padding: 60px 40px; }
+  .bottom-nav p { color: var(--text-dimmer); font-size: 14px; }
+
+  /* ── Reveal ── */
+  .reveal { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease, transform 0.6s ease; }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  /* ── Animations ── */
+  @keyframes fadeInUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes pulse-glow { 0%, 100% { box-shadow: 0 0 8px rgba(249,115,22,0.3); } 50% { box-shadow: 0 0 20px rgba(249,115,22,0.6); } }
+
+  /* ── Mobile ── */
+  @media (max-width: 900px) {
+    .sidebar { display: none; }
+    .main { margin-left: 0; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── LEFT SIDEBAR ── -->
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-inner">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-dot"></div>
+      <span class="sidebar-logo-text">C++ 指针与引用</span>
+    </div>
+
+    <div class="sidebar-section-title">目录</div>
+    <a class="sidebar-item active" href="#sec-pointer" data-section="sec-pointer">
+      <span class="s-icon">📍</span><span class="s-num">§1</span><span>指针基础</span>
+    </a>
+    <a class="sidebar-item" href="#sec-deref" data-section="sec-deref">
+      <span class="s-icon">&amp;*</span><span class="s-num">§2</span><span>取地址&amp;解引用</span>
+    </a>
+    <a class="sidebar-item" href="#sec-reference" data-section="sec-reference">
+      <span class="s-icon">🔗</span><span class="s-num">§3</span><span>引用</span>
+    </a>
+    <a class="sidebar-item" href="#sec-swap" data-section="sec-swap">
+      <span class="s-icon">🔄</span><span class="s-num">§4</span><span>三种传参方式</span>
+    </a>
+    <a class="sidebar-item" href="#sec-compare" data-section="sec-compare">
+      <span class="s-icon">📊</span><span class="s-num">§5</span><span>对比总结</span>
+    </a>
+    <a class="sidebar-item" href="#sec-pitfall" data-section="sec-pitfall">
+      <span class="s-icon">💀</span><span class="s-num">§6</span><span>常见错误</span>
+    </a>
+
+    <div class="sidebar-divider"></div>
+    <div class="sidebar-section-title">快速跳转</div>
+    <a class="sidebar-item" href="#top" data-section="top">
+      <span class="s-icon">⬆</span><span class="s-num"></span><span>回到顶部</span>
+    </a>
+
+    <div class="sidebar-progress">
+      <div class="sidebar-progress-label">阅读进度</div>
+      <div class="sidebar-progress-bar">
+        <div class="sidebar-progress-fill" id="progress-fill"></div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- ── MAIN CONTENT ── -->
+<div class="main" id="top">
+
+  <!-- HEADER -->
+  <header class="page-header">
+    <div class="logo-dot"></div>
+    <h1>C++ 指针与引用 · 互动教学</h1>
+    <span class="badge">信奥一本通</span>
+  </header>
+
+  <!-- HERO -->
+  <div class="hero">
+    <span class="hero-label">Chapter 6 · Pointer &amp; Reference</span>
+    <h2>C++ <span>指针</span> 与 <span>引用</span></h2>
+    <p>指针是存储地址的变量，引用是变量的别名。两者都能间接操作数据，但机制和用法截然不同。通过可视化动画，彻底搞懂它们！</p>
+    <div class="hero-tags">
+      <span class="tag active">指针基础</span>
+      <span class="tag">取地址 &amp; 解引用</span>
+      <span class="tag">引用本质</span>
+      <span class="tag">传参对比</span>
+      <span class="tag">常见陷阱</span>
+    </div>
+  </div>
+
+  <!-- ═══ SECTION 1: POINTER BASICS ═══ -->
+  <div class="section reveal" id="sec-pointer">
+    <div class="section-label">§1 指针基础</div>
+    <h3>指针是什么？</h3>
+    <p>指针是一种特殊变量，它存储的不是普通数据，而是另一个变量的<strong>内存地址</strong>。就像一张"地址便签"，通过它可以间接找到并操作目标变量。</p>
+
+    <div class="card">
+      <h4><span class="icon pointer">📍</span>指针的声明与定义</h4>
+      <div class="code-block">
+        <div class="code-header"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span><span class="code-title">pointer_basic.cpp</span></div>
+        <div class="code-body">
+<div class="code-line"><span class="ln">1</span><span class="src"><span class="pre">#include</span> <span class="str">&lt;iostream&gt;</span></span></div>
+<div class="code-line"><span class="ln">2</span><span class="src"><span class="kwd">using</span> <span class="kwd">namespace</span> std;</span></div>
+<div class="code-line"><span class="ln">3</span><span class="src"></span></div>
+<div class="code-line"><span class="ln">4</span><span class="src"><span class="kwd">int</span> a = <span class="num">42</span>;        <span class="cmt">// 定义一个整型变量 a</span></span></div>
+<div class="code-line"><span class="ln">5</span><span class="src"><span class="kwd">int</span> <span class="hl-orange">*</span> p = &amp;a;  <span class="cmt">// 定义指针 p，指向 a 的地址</span></span></div>
+<div class="code-line"><span class="ln">6</span><span class="src"></span></div>
+<div class="code-line"><span class="ln">7</span><span class="src">cout &lt;&lt; <span class="str">"a = "</span> &lt;&lt; a   &lt;&lt; endl;      <span class="cmt">// 直接访问 a</span></span></div>
+<div class="code-line"><span class="ln">8</span><span class="src">cout &lt;&lt; <span class="str">"*p = "</span> &lt;&lt; <span class="hl-orange">*p</span> &lt;&lt; endl;      <span class="cmt">// 通过指针 p 访问 a（解引用）</span></span></div>
+<div class="code-line"><span class="ln">9</span><span class="src">cout &lt;&lt; <span class="str">"p = "</span> &lt;&lt; p   &lt;&lt; endl;      <span class="cmt">// 打印 p 存储的地址</span></span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h4><span class="icon pointer">🧠</span>内存可视化</h4>
+      <div class="callout">
+        <span class="icon">💡</span>
+        <div>点击「▶ 运行动画」，观察指针变量 <code style="font-family:var(--font-code);color:var(--orange)">p</code> 中存储的是变量 <code style="font-family:var(--font-code);color:var(--blue)">a</code> 的<strong>内存地址</strong>。</div>
+      </div>
+      <div class="memory-scene">
+        <div class="scene-label">内存示意图</div>
+        <div class="mem-layout" id="mem-row-1">
+          <div class="mem-box var" id="box-a">
+            <div class="addr-label">变量名</div>
+            <div class="var-name">a</div>
+            <div class="var-val">42</div>
+            <div class="type-tag">int</div>
+            <div class="addr-display" id="addr-a">@ ???</div>
+          </div>
+          <div class="mem-arrow arrow2" id="arr-1">→</div>
+          <div class="mem-box ptr" id="box-p">
+            <div class="addr-label">指针名</div>
+            <div class="var-name">p</div>
+            <div class="var-val">?</div>
+            <div class="type-tag">int*</div>
+            <div class="addr-display" id="addr-p">@ ???</div>
+          </div>
+          <div class="mem-arrow arrow2">→</div>
+          <div class="ptr-target" id="ptr-target-1">
+            <div class="addr-label">指向</div>
+            <div class="var-val" id="ptr-pt-val">—</div>
+            <div class="addr-display" id="ptr-pt-addr"></div>
+          </div>
+        </div>
+        <div class="step-dots" id="dots-1">
+          <div class="step-dot active"></div>
+          <div class="step-dot"></div>
+          <div class="step-dot"></div>
+        </div>
+        <button class="run-btn" id="btn-1" onclick="runAnim1()">
+          <span>▶</span> 运行动画
+        </button>
+        <div class="output-box" id="out-1"></div>
+      </div>
+    </div>
+
+    <div class="callout blue">
+      <span class="icon">📝</span>
+      <div><strong>语法要点：</strong><br>
+      • 声明指针：<code style="font-family:var(--font-code)">int* p;</code> 或 <code style="font-family:var(--font-code)">int *p;</code><br>
+      • 指针类型必须与指向变量类型匹配——指向 <code style="font-family:var(--font-code)">int</code> 的类型是 <code style="font-family:var(--font-code)">int*</code><br>
+      • 指针本身也占用内存，也有自己的地址</div>
+    </div>
+  </div>
+
+  <!-- ═══ SECTION 2: ADDRESS & DEREFERENCE ═══ -->
+  <div class="section reveal" id="sec-deref">
+    <div class="section-label">§2 取地址 &amp; 解引用</div>
+    <h3>两个核心运算符</h3>
+    <p><code style="font-family:var(--font-code);color:var(--orange)">&amp;</code> 取地址 和 <code style="font-family:var(--font-code);color:var(--orange)">*</code> 解引用，是指针操作的灵魂。</p>
+
+    <div class="two-col">
+      <div class="card">
+        <h4><span class="icon pointer">&amp;</span>取地址运算符 &amp;</h4>
+        <p style="color:var(--text-dim);font-size:14px;margin-bottom:14px;">用在变量前，获取该变量的内存地址。</p>
+        <div class="code-block">
+          <div class="code-header"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div>
+          <div class="code-body">
+<div class="code-line"><span class="ln">1</span><span class="src"><span class="kwd">int</span> x = <span class="num">100</span>;</span></div>
+<div class="code-line"><span class="ln">2</span><span class="src"><span class="kwd">int</span> *px = <span class="hl-blue">&amp;x</span>;   <span class="cmt">// px 获得 x 的地址</span></span></div>
+          </div>
+        </div>
+        <div style="text-align:center;padding:16px;">
+          <div style="display:inline-flex;align-items:center;gap:12px;background:rgba(0,0,0,0.2);padding:14px 20px;border-radius:10px;border:1px solid var(--border);">
+            <span style="font-family:var(--font-code);color:var(--blue);font-size:15px;">x</span>
+            <span style="color:var(--text-dimmer);font-size:20px;">→</span>
+            <span style="font-family:var(--font-code);color:var(--orange);font-size:15px;">0x7ffd...</span>
+          </div>
+          <div style="font-size:12px;color:var(--text-dimmer);margin-top:8px;font-family:var(--font-code);">&amp;x 的结果是一个地址值</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h4><span class="icon pointer">*</span>解引用运算符 *</h4>
+        <p style="color:var(--text-dim);font-size:14px;margin-bottom:14px;">用在指针前，通过地址找到并访问指向的变量。</p>
+        <div class="code-block">
+          <div class="code-header"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div>
+          <div class="code-body">
+<div class="code-line"><span class="ln">1</span><span class="src"><span class="kwd">int</span> x = <span class="num">100</span>;</span></div>
+<div class="code-line"><span class="ln">2</span><span class="src"><span class="kwd">int</span> *px = &amp;x;</span></div>
+<div class="code-line"><span class="ln">3</span><span class="src">cout &lt;&lt; <span class="hl-orange">*px</span>;  <span class="cmt">// *px 读 x 的值 → 100</span></span></div>
+<div class="code-line"><span class="ln">4</span><span class="src"><span class="hl-orange">*px</span> = <span class="num">200</span>;  <span class="cmt">// 通过 px 修改 x → x = 200</span></span></div>
+          </div>
+        </div>
+        <div style="text-align:center;padding:16px;">
+          <div style="display:inline-flex;align-items:center;gap:12px;background:rgba(0,0,0,0.2);padding:14px 20px;border-radius:10px;border:1px solid var(--border);">
+            <span style="font-family:var(--font-code);color:var(--orange);font-size:15px;">*px</span>
+            <span style="color:var(--text-dimmer);font-size:20px;">→</span>
+            <span style="font-family:var(--font-code);color:var(--blue);font-size:15px;">x</span>
+            <span style="color:var(--text-dimmer);font-size:20px;">→</span>
+            <span style="font-family:var(--font-code);color:var(--blue);font-size:15px;">100</span>
+          </div>
+          <div style="font-size:12px;color:var(--text-dimmer);margin-top:8px;font-family:var(--font-code);">*px 找到 px 存的地址，对应变量 x</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card reveal" style="margin-top:16px;">
+      <h4><span class="icon pointer">➕</span>指针算术运算</h4>
+      <p style="color:var(--text-dim);font-size:14px;margin-bottom:14px;">指针加 1，不是地址值 +1，而是指向"下一个同类型元素"。</p>
+      <div class="arith-grid">
+        <div class="arith-card">
+          <div class="arith-expr">int arr[5] = {10,20,30};</div>
+          <div class="arith-expr">int* p = arr;</div>
+          <div style="font-size:11px;color:var(--text-dimmer);margin-top:8px;font-family:var(--font-code);">
+            arr == &amp;arr[0]<br>
+            p+1 == &amp;arr[1] （地址 +4字节）<br>
+            *(p+1) == 20
+          </div>
+        </div>
+        <div class="arith-card">
+          <div class="arith-expr">指针 + n</div>
+          <div class="arith-desc">向后移动 n 个"类型单位"。<br>int*: +n → 地址 + n×4 字节<br>double*: +n → 地址 + n×8 字节</div>
+        </div>
+        <div class="arith-card">
+          <div class="arith-expr">*p++ vs *(p++)</div>
+          <div class="arith-desc"><code style="font-family:var(--font-code);color:var(--orange)">*p++</code>：先取 *p 的值，<br>再把指针向后移 1 位。<br>常用于遍历数组。</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ SECTION 3: REFERENCE ═══ -->
+  <div class="section reveal" id="sec-reference">
+    <div class="section-label">§3 引用</div>
+    <h3>变量的别名</h3>
+    <p>引用不是独立变量，而是已有变量的<strong>另一个名字</strong>。一旦绑定，终身不变。就像给一个人取了个外号——无论你叫他本名还是外号，都是同一个人。</p>
+
+    <div class="card">
+      <h4><span class="icon ref">🔗</span>引用的基本用法</h4>
+      <div class="code-block">
+        <div class="code-header"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span><span class="code-title">reference_basic.cpp</span></div>
+        <div class="code-body">
+<div class="code-line"><span class="ln">1</span><span class="src"><span class="kwd">int</span> a = <span class="num">10</span>;           <span class="cmt">// 变量 a</span></span></div>
+<div class="code-line"><span class="ln">2</span><span class="src"><span class="kwd">int</span> <span class="hl-green">&amp;</span> r = a;         <span class="cmt">// r 是 a 的引用（别名）</span></span></div>
+<div class="code-line"><span class="ln">3</span><span class="src"></span></div>
+<div class="code-line"><span class="ln">4</span><span class="src">r = <span class="num">99</span>;             <span class="cmt">// 通过 r 修改，等价于 a = 99</span></span></div>
+<div class="code-line"><span class="ln">5</span><span class="src">cout &lt;&lt; a;          <span class="cmt">// 输出 99</span></span></div>
+<div class="code-line"><span class="ln">6</span><span class="src"></span></div>
+<div class="code-line"><span class="ln">7</span><span class="src">cout &lt;&lt; <span class="hl-blue">&amp;r</span>;         <span class="cmt">// &amp;r 的地址 == &amp;a（同一个位置）</span></span></div>
+        </div>
+      </div>
+      <div class="callout green">
+        <span class="icon">💡</span>
+        <div>引用与原变量<strong>共用同一块内存</strong>，修改引用就是修改原变量，<code style="font-family:var(--font-code)">&amp;r</code> 和 <code style="font-family:var(--font-code)">&amp;a</code> 的地址<strong>完全相同</strong>！</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h4><span class="icon ref">🧠</span>内存可视化：引用 vs 指针</h4>
+      <div class="two-col" style="margin-top:8px;">
+        <div>
+          <p style="font-size:13px;color:var(--text-dimmer);margin-bottom:12px;">引用（别名）</p>
+          <div class="mem-layout" style="flex-direction:column;align-items:center;gap:12px;">
+            <div class="mem-box var" style="width:180px;">
+              <div class="addr-label">变量</div>
+              <div class="var-name">a</div>
+              <div class="var-val">99</div>
+              <div class="type-tag">int</div>
+            </div>
+            <div class="dashed-arrow" style="max-width:160px;">&amp;a == &amp;r</div>
+            <div class="mem-box ref-box" style="width:180px;">
+              <div class="addr-label">引用（别名）</div>
+              <div class="var-name">r</div>
+              <div class="var-val">99</div>
+              <div class="type-tag">int&amp;</div>
+            </div>
+          </div>
+          <p style="text-align:center;font-size:12px;color:var(--green);margin-top:8px;">同一块内存，两个名字</p>
+        </div>
+        <div>
+          <p style="font-size:13px;color:var(--text-dimmer);margin-bottom:12px;">指针（地址变量）</p>
+          <div class="mem-layout" style="flex-direction:column;align-items:center;gap:12px;">
+            <div class="mem-box var" style="width:180px;">
+              <div class="addr-label">变量</div>
+              <div class="var-name">a</div>
+              <div class="var-val">99</div>
+              <div class="type-tag">int</div>
+            </div>
+            <div class="dashed-arrow" style="max-width:160px;">&amp;a 存进 p</div>
+            <div class="mem-box ptr" style="width:180px;">
+              <div class="addr-label">指针</div>
+              <div class="var-name">p</div>
+              <div class="var-val" style="font-size:14px;">0x7f...</div>
+              <div class="type-tag">int*</div>
+            </div>
+          </div>
+          <p style="text-align:center;font-size:12px;color:var(--orange);margin-top:8px;">两个变量，p 存 a 的地址</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ SECTION 4: THREE WAYS TO SWAP ═══ -->
+  <div class="section reveal" id="sec-swap">
+    <div class="section-label">§4 三种传参方式对比</div>
+    <h3>交换函数的正确打开方式</h3>
+    <p>这是信奥一本通的重点内容！同一个"交换两数"需求，用三种不同的参数传递方式，效果截然不同。</p>
+
+    <div class="swap-tabs">
+      <button class="swap-tab active" onclick="showSwap(0)">❌ 值传递</button>
+      <button class="swap-tab" onclick="showSwap(1)">✅ 指针传参</button>
+      <button class="swap-tab" onclick="showSwap(2)">✅ 引用传参</button>
+    </div>
+
+    <!-- Panel 0: pass by value -->
+    <div class="swap-panel active" id="panel-0">
+      <div class="card">
+        <h4 style="color:var(--red);"><span class="icon" style="background:rgba(248,113,113,0.15);color:var(--red);">✗</span>值传递（传的是副本）</h4>
+        <div class="code-block">
+          <div class="code-header"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div>
+          <div class="code-body">
+<div class="code-line"><span class="ln">1</span><span class="src"><span class="kwd">void</span> <span class="fn">swap</span>(<span class="kwd">int</span> x, <span class="kwd">int</span> y) { <span class="cmt">// 形参是副本</span></span></div>
+<div class="code-line"><span class="ln">2</span><span class="src">    <span class="kwd">int</span> t = x; x = y; y = t;</span></div>
+<div class="code-line"><span class="ln">3</span><span class="src">}</span></div>
+<div class="code-line"><span class="ln">4</span><span class="src"><span class="kwd">int</span> a=<span class="num">1</span>, b=<span class="num">2</span>;</span></div>
+<div class="code-line"><span class="ln">5</span><span class="src"><span class="fn">swap</span>(a, b);  <span class="cmt">// 实参不受影响</span></span></div>
+<div class="code-line"><span class="ln">6</span><span class="src">cout &lt;&lt; a &lt;&lt; <span class="str">' '</span> &lt;&lt; b;  <span class="cmt">// 输出 1 2（未交换！）</span></span></div>
+          </div>
+        </div>
+        <div class="result-chip fail" style="margin-top:12px;">
+          <span class="emoji">❌</span> 交换失败：a=1, b=2（a 和 b 的值没变）
+        </div>
+        <div class="callout" style="margin-top:14px;">
+          <span class="icon">🧠</span>
+          <div><strong>原因：</strong>形参 x、y 是 a、b 的<strong>副本</strong>。函数内交换的只是副本，原变量纹丝不动。就像复印了一份合同去修改，原件当然不变。</div>
+        </div>
+        <div class="memory-scene" style="margin-top:16px;">
+          <div class="scene-label">栈帧示意图</div>
+          <div style="display:flex;flex-direction:column;gap:16px;align-items:center;">
+            <div style="display:flex;gap:16px;flex-wrap:wrap;justify-content:center;">
+              <div class="mem-box var" style="border-color:rgba(96,165,250,0.4);">
+                <div class="addr-label">main 栈帧</div>
+                <div style="font-size:12px;color:var(--text-dimmer);margin-bottom:4px;">变量</div>
+                <div><span style="font-family:var(--font-code);color:var(--blue);">a = 1</span></div>
+                <div><span style="font-family:var(--font-code);color:var(--blue);">b = 2</span></div>
+              </div>
+              <div class="mem-box ptr" style="opacity:0.4;">
+                <div class="addr-label">swap 栈帧</div>
+                <div style="font-size:12px;color:var(--text-dimmer);margin-bottom:4px;">形参副本</div>
+                <div><span style="font-family:var(--font-code);color:var(--orange);">x = 1 → 2</span></div>
+                <div><span style="font-family:var(--font-code);color:var(--orange);">y = 2 → 1</span></div>
+              </div>
+            </div>
+            <div style="font-size:13px;color:var(--red);text-align:center;">⚠ swap 函数结束后，swap 栈帧被销毁，交换结果丢失</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Panel 1: pointer -->
+    <div class="swap-panel" id="panel-1">
+      <div class="card">
+        <h4 style="color:var(--green);"><span class="icon" style="background:rgba(74,222,128,0.15);color:var(--green);">✓</span>指针传参（传地址）</h4>
+        <div class="code-block">
+          <div class="code-header"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div>
+          <div class="code-body">
+<div class="code-line"><span class="ln">1</span><span class="src"><span class="kwd">void</span> <span class="fn">swap</span>(<span class="kwd">int</span> *x, <span class="kwd">int</span> *y) {</span></div>
+<div class="code-line"><span class="ln">2</span><span class="src">    <span class="kwd">int</span> t = <span class="hl-orange">*x</span>;</span></div>
+<div class="code-line"><span class="ln">3</span><span class="src">    <span class="hl-orange">*x</span> = <span class="hl-orange">*y</span>;</span></div>
+<div class="code-line"><span class="ln">4</span><span class="src">    <span class="hl-orange">*y</span> = t;</span></div>
+<div class="code-line"><span class="ln">5</span><span class="src">}</span></div>
+<div class="code-line"><span class="ln">6</span><span class="src"><span class="kwd">int</span> a=<span class="num">1</span>, b=<span class="num">2</span>;</span></div>
+<div class="code-line"><span class="ln">7</span><span class="src"><span class="fn">swap</span>(<span class="hl-blue">&amp;a</span>, <span class="hl-blue">&amp;b</span>);  <span class="cmt">// 传地址</span></span></div>
+<div class="code-line"><span class="ln">8</span><span class="src">cout &lt;&lt; a &lt;&lt; <span class="str">' '</span> &lt;&lt; b;  <span class="cmt">// 输出 2 1 ✓</span></span></div>
+          </div>
+        </div>
+        <div class="result-chip ok" style="margin-top:12px;"><span class="emoji">✅</span> 交换成功：a=2, b=1</div>
+        <div class="callout green" style="margin-top:14px;">
+          <span class="icon">💡</span>
+          <div><strong>原理：</strong>通过 <code style="font-family:var(--font-code)">&amp;a</code> 把 a 的地址传给指针形参，函数内用 <code style="font-family:var(--font-code)">*x</code> 找到 a 的位置直接修改——就像拿到钥匙🔑去房间改东西。</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Panel 2: reference -->
+    <div class="swap-panel" id="panel-2">
+      <div class="card">
+        <h4 style="color:var(--green);"><span class="icon" style="background:rgba(74,222,128,0.15);color:var(--green);">✓</span>引用传参（最简洁）</h4>
+        <div class="code-block">
+          <div class="code-header"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div>
+          <div class="code-body">
+<div class="code-line"><span class="ln">1</span><span class="src"><span class="kwd">void</span> <span class="fn">swap</span>(<span class="kwd">int</span> <span class="hl-green">&amp;</span> x, <span class="kwd">int</span> <span class="hl-green">&amp;</span> y) {</span></div>
+<div class="code-line"><span class="ln">2</span><span class="src">    <span class="kwd">int</span> t = x; x = y; y = t;</span></div>
+<div class="code-line"><span class="ln">3</span><span class="src">}</span></div>
+<div class="code-line"><span class="ln">4</span><span class="src"><span class="kwd">int</span> a=<span class="num">1</span>, b=<span class="num">2</span>;</span></div>
+<div class="code-line"><span class="ln">5</span><span class="src"><span class="fn">swap</span>(a, b);  <span class="cmt">// 直接传 a, b，像值传递一样简洁</span></span></div>
+<div class="code-line"><span class="ln">6</span><span class="src">cout &lt;&lt; a &lt;&lt; <span class="str">' '</span> &lt;&lt; b;  <span class="cmt">// 输出 2 1 ✓</span></span></div>
+          </div>
+        </div>
+        <div class="result-chip ok" style="margin-top:12px;"><span class="emoji">✅</span> 交换成功：a=2, b=1</div>
+        <div class="callout blue" style="margin-top:14px;">
+          <span class="icon">✨</span>
+          <div><strong>C++ 的优势：</strong>引用传参语法上和值传递一样简洁（不需要写 <code style="font-family:var(--font-code)">&amp;</code> 和 <code style="font-family:var(--font-code)">*</code>），但效果上却能直接修改实参。这是 C++ 优于 C 语言的核心特性之一。</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ SECTION 5: COMPARISON TABLE ═══ -->
+  <div class="section reveal" id="sec-compare">
+    <div class="section-label">§5 对比总结</div>
+    <h3>指针 vs 引用 · 十维对比</h3>
+
+    <div class="card" style="overflow-x:auto;">
+      <table class="cmp-table">
+        <thead>
+          <tr><th>对比维度</th><th><span class="tag-p">指针 *</span></th><th><span class="tag-r">引用 &amp;</span></th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="dim">定义方式</td><td><code style="font-family:var(--font-code);font-size:12px;">int* p</code></td><td><code style="font-family:var(--font-code);font-size:12px;">int&amp; r = a</code></td></tr>
+          <tr><td class="dim">是否必须初始化</td><td>可以不初始化（危险⚠）</td><td>必须初始化（语法强制）</td></tr>
+          <tr><td class="dim">能否为空</td><td>可以 <code style="font-family:var(--font-code);font-size:11px;color:var(--orange)">nullptr</code></td><td>不能为 null</td></tr>
+          <tr><td class="dim">能否重新指向</td><td>可以 <code style="font-family:var(--font-code);font-size:12px;">p = &amp;b;</code></td><td>不可以，<code style="font-family:var(--font-code);font-size:12px;">r=b</code> 是赋值操作</td></tr>
+          <tr><td class="dim">解引用</td><td>需要 <code style="font-family:var(--font-code);font-size:12px;">*p = 10</code></td><td>直接使用 <code style="font-family:var(--font-code);font-size:12px;">r = 10</code></td></tr>
+          <tr><td class="dim">sizeof 结果</td><td>固定 4/8 字节</td><td>与原变量相同（如 <code style="font-family:var(--font-code);font-size:12px;">sizeof(int&amp;)</code>=4）</td></tr>
+          <tr><td class="dim">多级形式</td><td>支持 <code style="font-family:var(--font-code);font-size:12px;">int**</code>、<code style="font-family:var(--font-code);font-size:12px;">int***</code></td><td>不支持（<code style="font-family:var(--font-code);font-size:12px;">int&amp;&amp;</code> 是右值引用）</td></tr>
+          <tr><td class="dim">函数参数检查</td><td>需要检查是否为 <code style="font-family:var(--font-code);font-size:12px;">nullptr</code></td><td>无需检查（默认有效）</td></tr>
+          <tr><td class="dim">底层本质</td><td>独立变量，存地址值</td><td>原变量的别名（底层是常量指针）</td></tr>
+          <tr><td class="dim">语法简洁度</td><td>需要 &amp; 和 *，相对繁琐</td><td>像普通变量一样使用，最简洁</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout green" style="margin-top:8px;">
+      <span class="icon">🎯</span>
+      <div><strong>实战原则：</strong><br>
+      • 能在任何场景下用<strong>引用</strong>就别用指针——引用更安全、更简洁<br>
+      • 需要"不指向任何对象"时用指针（传参前记得判空）<br>
+      • 需要动态改变指向目标时必须用指针<br>
+      • C++ 中引用可以替代指针的绝大多数场景</div>
+    </div>
+  </div>
+
+  <!-- ═══ SECTION 6: PITFALLS ═══ -->
+  <div class="section reveal" id="sec-pitfall">
+    <div class="section-label">§6 常见错误</div>
+    <h3>新手必避的坑</h3>
+
+    <div class="pitfall-card">
+      <h5>💀 野指针（Wild Pointer）</h5>
+      <p>指针声明后未初始化，就直接解引用访问，指向随机地址，可能导致程序崩溃或数据损坏。</p>
+      <div class="code-block" style="margin-top:10px;">
+        <div class="code-body">
+<div class="code-line"><span class="ln">1</span><span class="src"><span class="kwd">int</span> *p;    <span class="cmt">// ⚠ 未初始化，p 指向随机地址</span></span></div>
+<div class="code-line"><span class="ln">2</span><span class="src"><span class="hl-orange">*p = 100</span>; <span class="cmt">// 💀 危险！可能崩溃或破坏数据</span></span></div>
+        </div>
+      </div>
+      <p style="margin-top:8px;">✅ 正确：<code style="font-family:var(--font-code);font-size:12px;">int* p = nullptr;</code> 或 <code style="font-family:var(--font-code);font-size:12px;">int* p = &amp;a;</code></p>
+    </div>
+
+    <div class="pitfall-card">
+      <h5>💀 空指针解引用（Null Dereference）</h5>
+      <p>指针值为 <code style="font-family:var(--font-code)">nullptr</code> 时解引用，程序直接崩溃（段错误）。</p>
+      <div class="code-block" style="margin-top:10px;">
+        <div class="code-body">
+<div class="code-line"><span class="ln">1</span><span class="src"><span class="kwd">int</span> *p = <span class="kwd">nullptr</span>;</span></div>
+<div class="code-line"><span class="ln">2</span><span class="src"><span class="hl-orange">cout &lt;&lt; *p;</span>   <span class="cmt">// 💀 崩溃！不能解引用 nullptr</span></span></div>
+        </div>
+      </div>
+      <p style="margin-top:8px;">✅ 正确：解引用前先判断 <code style="font-family:var(--font-code);font-size:12px;">if(p != nullptr)</code></p>
+    </div>
+
+    <div class="pitfall-card">
+      <h5>💀 悬空引用（Dangling Reference）</h5>
+      <p>引用指向了一个已被销毁的变量（内存已被回收）。</p>
+      <div class="code-block" style="margin-top:10px;">
+        <div class="code-body">
+<div class="code-line"><span class="ln">1</span><span class="src"><span class="kwd">int</span>&amp; <span class="fn">foo</span>() {</span></div>
+<div class="code-line"><span class="ln">2</span><span class="src">    <span class="kwd">int</span> x = <span class="num">10</span>;</span></div>
+<div class="code-line"><span class="ln">3</span><span class="src">    <span class="kwd">return</span> <span class="hl-orange">x</span>;  <span class="cmt">// ⚠ x 在函数结束时销毁</span></span></div>
+<div class="code-line"><span class="ln">4</span><span class="src">}</span></div>
+<div class="code-line"><span class="ln">5</span><span class="src"><span class="kwd">int</span>&amp; r = <span class="fn">foo</span>();  <span class="cmt">// 💀 r 成了悬空引用</span></span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="pitfall-card">
+      <h5>💀 对引用的"重新绑定"误解</h5>
+      <p>误以为 <code style="font-family:var(--font-code)">ref = b</code> 可以让 ref 指向 b，实际上只是把 b 的值赋给原变量。</p>
+      <div class="code-block" style="margin-top:10px;">
+        <div class="code-body">
+<div class="code-line"><span class="ln">1</span><span class="src"><span class="kwd">int</span> a=<span class="num">10</span>, b=<span class="num">20</span>;</span></div>
+<div class="code-line"><span class="ln">2</span><span class="src"><span class="kwd">int</span>&amp; r = a;    <span class="cmt">// r 绑定到 a</span></span></div>
+<div class="code-line"><span class="ln">3</span><span class="src">r = b;          <span class="cmt">// ⚠ 不是"指向 b"，而是 a = b</span></span></div>
+<div class="code-line"><span class="ln">4</span><span class="src"><span class="cmt">// 结果：a = 20, r 仍然绑定 a</span></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="bottom-nav">
+    <p>内容参考：《信息学奥赛一本通》第六章 · 指针模块</p>
+    <p style="margin-top:8px;">掌握指针与引用，迈向 C++ 高阶之路 🚀</p>
+  </div>
+
+</div><!-- /main -->
+
+<script>
+// ─── Sidebar nav ───
+document.querySelectorAll('.sidebar-item[data-section]').forEach(item => {
+  item.addEventListener('click', function(e) {
+    e.preventDefault();
+    const section = this.getAttribute('data-section');
+    // Update active
+    document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+    this.classList.add('active');
+    // Scroll
+    if (section === 'top') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      const el = document.getElementById(section);
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
+});
+
+// ─── Intersection Observer: reveal ───
+const reveals = document.querySelectorAll('.reveal');
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+reveals.forEach(el => io.observe(el));
+
+// ─── Intersection Observer: active section ───
+const sections = ['sec-pointer','sec-deref','sec-reference','sec-swap','sec-compare','sec-pitfall'];
+const secObs = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      const id = e.target.id;
+      document.querySelectorAll('.sidebar-item[data-section]').forEach(item => {
+        item.classList.toggle('active', item.getAttribute('data-section') === id);
+      });
+      updateProgress();
+    }
+  });
+}, { threshold: 0.3 });
+sections.forEach(sid => {
+  const el = document.getElementById(sid);
+  if (el) secObs.observe(el);
+});
+
+// ─── Progress bar ───
+function updateProgress() {
+  const total = sections.length;
+  let visible = 0;
+  sections.forEach(sid => {
+    const el = document.getElementById(sid);
+    if (el) {
+      const rect = el.getBoundingClientRect();
+      if (rect.top < window.innerHeight * 0.5) visible++;
+    }
+  });
+  const pct = Math.round((visible / total) * 100);
+  const fill = document.getElementById('progress-fill');
+  if (fill) fill.style.width = pct + '%';
+}
+window.addEventListener('scroll', updateProgress, { passive: true });
+
+// ─── Swap tabs ───
+function showSwap(idx) {
+  document.querySelectorAll('.swap-tab').forEach((t,i) => t.classList.toggle('active', i === idx));
+  document.querySelectorAll('.swap-panel').forEach((p,i) => p.classList.toggle('active', i === idx));
+}
+
+// ─── Memory animation (Section 1) ───
+let anim1Running = false;
+let anim1Step = 0;
+
+function runAnim1() {
+  if (anim1Running) return;
+  anim1Running = true;
+  anim1Step = 0;
+  const btn = document.getElementById('btn-1');
+  btn.disabled = true;
+  btn.innerHTML = '<span>⏳</span> 运行中...';
+
+  const boxA = document.getElementById('box-a');
+  const boxP = document.getElementById('box-p');
+  const ptrTarget = document.getElementById('ptr-target-1');
+  const addrA = document.getElementById('addr-a');
+  const addrP = document.getElementById('addr-p');
+  const ptrPtVal = document.getElementById('ptr-pt-val');
+  const ptrPtAddr = document.getElementById('ptr-pt-addr');
+  const dots = document.querySelectorAll('#dots-1 .step-dot');
+  const out = document.getElementById('out-1');
+  const addrOfA = '0x7ffd' + Math.floor(Math.random()*9000+1000);
+
+  function setDot(n) {
+    dots.forEach((d,i) => { d.classList.remove('active','done'); if(i<n) d.classList.add('done'); if(i===n) d.classList.add('active'); });
+  }
+
+  function next() {
+    if (anim1Step >= 3) {
+      anim1Running = false;
+      btn.disabled = false;
+      btn.innerHTML = '<span>↺</span> 重新运行';
+      return;
+    }
+    if (anim1Step === 0) {
+      setDot(0);
+      boxA.classList.add('highlight');
+      addrA.textContent = '@ ' + addrOfA;
+      out.innerHTML = `<div class="output-line"><span class="prompt">$</span> <span style="color:var(--text-dimmer)">定义变量 int a = 42;</span></div>`;
+    } else if (anim1Step === 1) {
+      setDot(1);
+      boxA.classList.remove('highlight');
+      boxP.classList.add('highlight');
+      boxP.querySelector('.var-val').textContent = addrOfA;
+      addrP.textContent = '@ p (自身地址)';
+      out.innerHTML += `<div class="output-line"><span class="prompt">$</span> <span style="color:var(--text-dimmer)">int *p = &amp;a;  // p 存储 a 的地址</span></div>`;
+    } else if (anim1Step === 2) {
+      setDot(2);
+      boxP.classList.remove('highlight');
+      ptrTarget.classList.add('highlight');
+      ptrPtVal.textContent = '42';
+      ptrPtAddr.textContent = '@ ' + addrOfA;
+      out.innerHTML += `<div class="output-line"><span class="prompt">$</span> <span style="color:var(--text-dimmer)">cout &lt;&lt; *p;  // 通过 p 找到 a，值为 42</span></div>`;
+      out.innerHTML += `<div class="output-line"><span class="prompt">&gt;</span> <span class="out-val">42</span></div>`;
+    }
+    anim1Step++;
+    setTimeout(next, anim1Step === 3 ? 800 : 1400);
+  }
+
+  // Reset
+  boxA.classList.remove('highlight'); boxP.classList.remove('highlight'); ptrTarget.classList.remove('highlight');
+  boxP.querySelector('.var-val').textContent = '?';
+  addrA.textContent = '@ ???'; addrP.textContent = '@ ???';
+  ptrPtVal.textContent = '—'; ptrPtAddr.textContent = '';
+  out.innerHTML = '';
+  dots.forEach(d => { d.classList.remove('active','done'); });
+  setTimeout(next, 300);
+}
+</script>
+</body>
+</html>
