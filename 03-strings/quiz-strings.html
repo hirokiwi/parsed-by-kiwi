@@ -681,7 +681,7 @@
     <div class="q-text">下面程序最后能够得到 <code>"HelloC++"</code> 的是（ ）</div>
     <div class="q-code"><span class="cmt">// 程序1</span>
 <span class="tp">string</span> str = <span class="st">"Hello"</span>;
-str.<span class="fn">replace</span>(<span class="num">0</span>, <span class="num">5</span>, <span class="st">"HelloC++"</span>);
+str.<span class="fn">replace</span>(<span class="num">0</span>, <span class="num">5</span>, <span class="st">"HelloC+"</span>);
 <span class="fn">cout</span> <span class="op">&lt;&lt;</span> str;
 
 <span class="cmt">// 程序2</span>
@@ -708,7 +708,7 @@ str.<span class="fn">replace</span>(<span class="num">5</span>, <span class="num
   <div class="q-right">
     <div class="analysis-badge">✏️ 解析</div>
     <div class="analysis-step">
-      <strong>A.</strong> replace(0,5,"HelloC++") → "Hello"长度5，从0删5个=删全部，插"HelloC++" → "HelloC++"（碰巧对，但非目标思路）<br>
+      <strong>A.</strong> replace(0,5,"HelloC+") → "Hello"长度5，从0删5个=删全部，插"HelloC+" → "HelloC+" ✗（少一个+）<br>
       <strong>B.</strong> replace(5,5,"C++") → "Hello"长度5，下标5指向末尾，追加"C++" → "HelloC++" ✓<br>
       <strong>C.</strong> replace(1,5,"C++") → 从下标1删5个（"ello"），剩"H"，插"C++" → "HC++" ✗<br>
       <strong>D.</strong> replace(5,5,"") → "HelloC++World"，从下标5删5个字符（C++），插空 → "HelloWorld" ✗
