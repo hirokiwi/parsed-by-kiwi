@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>字符串 · 随堂测逐题解析</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&family=Fira+Code:wght@400;500;700&display=swap');
+
+  :root {
+    --bg-deep: #242433;
+    --glass-bg: rgba(36, 38, 54, 0.45);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --glass-hover: rgba(42, 44, 62, 0.6);
+    --accent: #f97316;
+    --accent-light: #fb923c;
+    --accent-glow: rgba(249, 115, 22, 0.2);
+    --green: #4ade80;
+    --green-bg: rgba(74, 222, 128, 0.14);
+    --red: #f87171;
+    --red-bg: rgba(248, 113, 113, 0.12);
+    --blue: #60a5fa;
+    --blue-bg: rgba(96, 165, 250, 0.14);
+    --text-primary: #f1f5f9;
+    --text-body: #e2e8f0;
+    --text-muted: #94a3b8;
+    --code-bg: rgba(28, 30, 44, 0.8);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg-deep);
+    color: var(--text-primary);
+    line-height: 1.75;
+    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0; z-index: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 20% 10%, rgba(249,115,22,0.08) 0%, transparent 50%),
+      radial-gradient(ellipse 60% 80% at 80% 90%, rgba(96,165,250,0.06) 0%, transparent 50%),
+      radial-gradient(ellipse 50% 50% at 50% 50%, rgba(74,222,128,0.04) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  body::after {
+    content: '';
+    position: fixed; inset: 0; z-index: 0; opacity: 0.03;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+  }
+
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg-deep); }
+  ::-webkit-scrollbar-thumb { background: rgba(249,115,22,0.4); border-radius: 3px; }
+
+  .container {
+    position: relative; z-index: 1;
+    width: 100%; max-width: 100%; margin: 0 auto; padding: 0 32px 80px;
+  }
+
+  .header {
+    position: relative; z-index: 1;
+    padding: 56px 40px 40px; text-align: center;
+    margin-bottom: 8px;
+  }
+  .header-glass {
+    position: absolute; inset: 0; z-index: -1;
+    background: rgba(18, 20, 32, 0.5);
+    backdrop-filter: blur(24px) saturate(1.2);
+    -webkit-backdrop-filter: blur(24px) saturate(1.2);
+    border-bottom: 1px solid var(--glass-border);
+  }
+  .header-tag {
+    display: inline-block; padding: 5px 18px;
+    background: rgba(249,115,22,0.12); border: 1px solid rgba(249,115,22,0.35);
+    border-radius: 50px; font-size: 12px; color: var(--accent-light);
+    letter-spacing: 2px; margin-bottom: 18px;
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  }
+  .header h1 {
+    font-size: clamp(26px, 4vw, 38px); font-weight: 900;
+    color: var(--text-primary); margin-bottom: 10px;
+    text-shadow: 0 0 40px rgba(249,115,22,0.15);
+  }
+  .header p { color: var(--text-muted); font-size: 15px; }
+
+  .q-card {
+    position: relative;
+    margin-bottom: 0;
+  }
+  .q-card-inner {
+    position: relative; z-index: 1;
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px) saturate(1.1);
+    -webkit-backdrop-filter: blur(20px) saturate(1.1);
+    border: 1px solid var(--glass-border);
+    display: grid; grid-template-columns: 1fr 1fr;
+    transition: all 0.3s ease;
+  }
+  .q-card-inner:hover {
+    background: var(--glass-hover);
+    border-color: rgba(249,115,22,0.15);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.04);
+  }
+
+  .q-left {
+    padding: 36px 40px; border-right: 1px solid var(--glass-border);
+    display: flex; flex-direction: column; justify-content: center;
+  }
+  .q-num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 34px; height: 34px;
+    background: linear-gradient(135deg, var(--accent), #ea580c);
+    border-radius: 10px; font-size: 14px; font-weight: 900; color: #fff;
+    margin-bottom: 18px; flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(249,115,22,0.3);
+  }
+  .q-text {
+    font-size: 15.5px; line-height: 1.85; margin-bottom: 22px;
+    color: var(--text-body);
+  }
+  .q-text code {
+    background: var(--code-bg); padding: 2px 8px; border-radius: 5px;
+    font-family: 'Fira Code', Consolas, monospace; font-size: 13px;
+    color: var(--accent-light); border: 1px solid rgba(249,115,22,0.15);
+  }
+
+  .q-options { display: flex; flex-direction: column; gap: 10px; }
+  .q-option {
+    padding: 11px 18px;
+    background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border);
+    border-radius: 10px; font-size: 14px; color: var(--text-muted);
+    cursor: default; transition: all 0.2s;
+    display: flex; align-items: flex-start; gap: 12px;
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  }
+  .q-option:hover { border-color: rgba(255,255,255,0.12); background: rgba(255,255,255,0.05); }
+  .q-option .opt-letter {
+    min-width: 24px; height: 24px; border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700; flex-shrink: 0;
+    background: rgba(255,255,255,0.06); color: var(--text-muted);
+  }
+  .q-option.correct {
+    border-color: rgba(74,222,128,0.4); background: var(--green-bg);
+  }
+  .q-option.correct .opt-letter { background: var(--green); color: #0a0a0f; }
+  .q-option.correct .opt-text { color: var(--green); font-weight: 500; }
+
+  /* 判断题选项 */
+  .judge-opts { display: flex; gap: 12px; }
+  .judge-opt {
+    padding: 11px 28px; border-radius: 10px; font-size: 14px;
+    background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border);
+    color: var(--text-muted); cursor: default;
+  }
+  .judge-opt.correct {
+    border-color: rgba(74,222,128,0.4); background: var(--green-bg);
+    color: var(--green); font-weight: 700;
+  }
+
+  .q-code {
+    background: var(--code-bg);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 10px; padding: 16px 20px;
+    font-family: 'Fira Code', Consolas, 'Courier New', monospace;
+    font-size: 13.5px; line-height: 1.9; color: #e2e8f0;
+    margin-bottom: 18px; overflow-x: auto; white-space: pre;
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  }
+  .q-code .kw { color: #569cd6; }
+  .q-code .tp { color: #569cd6; }
+  .q-code .fn { color: #5b6abf; }
+  .q-code .st { color: #ce9178; }
+  .q-code .num { color: #b5cea8; }
+  .q-code .cmt { color: #6a9955; }
+  .q-code .pp { color: #c586c0; }
+  .q-code .op { color: #d4d4d4; }
+  .q-code .ns { color: #4ec9b0; }
+
+  .q-right {
+    padding: 36px 40px;
+    display: flex; flex-direction: column; justify-content: center;
+  }
+  .analysis-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 5px 14px;
+    background: var(--accent-glow); border: 1px solid rgba(249,115,22,0.25);
+    border-radius: 6px; font-size: 12px; color: var(--accent-light);
+    font-weight: 700; margin-bottom: 18px;
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  }
+  .analysis-title {
+    font-size: 16px; font-weight: 700; margin-bottom: 14px;
+    color: var(--accent-light);
+  }
+  .analysis-body {
+    font-size: 14px; color: var(--text-body); line-height: 2.1;
+  }
+  .analysis-body strong { color: var(--text-primary); }
+  .analysis-body code {
+    background: var(--code-bg); padding: 2px 8px; border-radius: 4px;
+    font-family: 'Fira Code', Consolas, monospace; font-size: 13px;
+    color: var(--accent-light); border: 1px solid rgba(249,115,22,0.12);
+  }
+  .analysis-step {
+    padding: 14px 18px;
+    background: rgba(255,255,255,0.03); border-radius: 10px;
+    border-left: 3px solid var(--accent); margin: 12px 0;
+    font-size: 13.5px; line-height: 2.1; color: var(--text-body);
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  }
+  .analysis-step strong { color: var(--text-primary); }
+  .analysis-step code {
+    background: var(--code-bg); padding: 1px 6px; border-radius: 3px;
+    font-family: 'Fira Code', Consolas, monospace; font-size: 12px;
+    color: var(--accent-light);
+  }
+  .analysis-conclusion {
+    margin-top: 18px; padding: 14px 20px;
+    background: var(--green-bg); border: 1px solid rgba(74,222,128,0.25);
+    border-radius: 10px; font-size: 14px; font-weight: 700; color: var(--green);
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  }
+  .analysis-trap {
+    margin-top: 14px; padding: 14px 20px;
+    background: var(--red-bg); border: 1px solid rgba(248,113,113,0.2);
+    border-radius: 10px; font-size: 13px; color: #fca5a5; line-height: 1.9;
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  }
+  .analysis-trap strong { color: var(--red); }
+  .analysis-note {
+    margin-top: 14px; padding: 14px 20px;
+    background: var(--blue-bg); border: 1px solid rgba(96,165,250,0.2);
+    border-radius: 10px; font-size: 13px; color: #93c5fd; line-height: 1.9;
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  }
+  .analysis-note strong { color: var(--blue); }
+
+  @media(max-width: 900px) {
+    .q-card-inner { grid-template-columns: 1fr; }
+    .q-left { border-right: none; border-bottom: 1px solid var(--glass-border); padding: 28px 24px; }
+    .q-right { padding: 28px 24px; }
+    .header { padding: 36px 20px 28px; }
+    .container { padding: 0 12px 60px; }
+  }
+
+  @media print {
+    body { background: #fff; color: #1a1a2e; }
+    .header-glass, body::before, body::after { display: none; }
+    .q-card-inner {
+      background: #fff; border: 1px solid #e5e7eb;
+      backdrop-filter: none; -webkit-backdrop-filter: none;
+    }
+    .q-option.correct { border-color: #16a34a; background: #f0fdf4; }
+    .q-option.correct .opt-text { color: #16a34a; }
+    .q-code { background: #f8fafc; border: 1px solid #e5e7eb; color: #334155; }
+    .analysis-step { background: #f8fafc; }
+    .analysis-conclusion { background: #f0fdf4; border-color: #86efac; color: #16a34a; }
+    .analysis-trap { background: #fef2f2; border-color: #fca5a5; color: #b91c1c; }
+    .q-text, .analysis-body, .analysis-step { color: #1a1a2e; }
+    .q-text code, .analysis-body code, .analysis-step code { color: #c2410c; background: #fff7ed; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<div class="header">
+  <div class="header-glass"></div>
+  <div class="header-tag">C++ 随堂测</div>
+  <h1>字符串 · 逐题解析</h1>
+  <p>单选题 1-15 · 判断题 16-20 · 共20题</p>
+</div>
+
+<!-- Q1 -->
+<div class="q-card">
+  <div class="q-card-inner">
+  <div class="q-left">
+    <div class="q-num">1</div>
+    <div class="q-text">在C++中，下列哪个头文件提供了对字符串（string）的支持？</div>
+    <div class="q-options">
+      <div class="q-option"><span class="opt-letter">A</span><span class="opt-text"><code>#include &lt;cstring&gt;</code></span></div>
+      <div class="q-option correct"><span class="opt-letter">B</span><span class="opt-text"><code>#include &lt;string&gt;</code></span></div>
+      <div class="q-option"><span class="opt-letter">C</span><span class="opt-text"><code>#include &lt;strlib&gt;</code></span></div>
+      <div class="q-option"><span class="opt-letter">D</span><span class="opt-text"><code>#include &lt;strings&gt;</code></span></div>
+    </div>
+  </div>
+  <div class="q-right">
+    <div class="analysis-badge">✏️ 解析</div>
+    <div class="analysis-step">
+      <strong>B.</strong> <code>#include &lt;string&gt;</code> → C++ 标准库字符串类所在头文件 ✓<br>
+      <strong>A.</strong> <code>&lt;cstring&gt;</code> → C 风格字符串函数（strlen, strcpy 等）<br>
+      <strong>C.</strong> <code>&lt;strlib&gt;</code> → 不存在此头文件 ✗<br>
+      <strong>D.</strong> <code>&lt;strings&gt;</code> → C++20 才引入，且是大写敏感的 C 风格字符串函数
+    </div>
+    <div class="analysis-note">
+      💡 <strong>记忆口诀：</strong>用 string 类就 include string，简洁好记。
+    </div>
+    <div class="analysis-conclusion">✅ 答案：B</div>
+  </div>
+  </div>
+</div>
+
+<!-- Q2 -->
+<div class="q-card">
+  <div class="q-card-inner">
+  <div class="q-left">
+    <div class="q-num">2</div>
+    <div class="q-text">若有 <code>string s = "Hello";</code>，则 <code>s.length()</code> 的返回值是（ ）</div>
+    <div class="q-options">
+      <div class="q-option"><span class="opt-letter">A</span><span class="opt-text">4</span></div>
+      <div class="q-option correct"><span class="opt-letter">B</span><span class="opt-text">5</span></div>
+      <div class="q-option"><span class="opt-letter">C</span><span class="opt-text">6</span></div>
+      <div class="q-option"><span class="opt-letter">D</span><span class="opt-text">不确定</span></div>
+    </div>
+  </div>
+  <div class="q-right">
+    <div class="analysis-badge">✏️ 解析</div>
+    <div class="analysis-body">
+      <code>"Hello"</code> 包含 5 个字符：H-e-l-l-o
+    </div>
+    <div class="analysis-step">
+      <code>length()</code> 返回字符串的<strong>字符数</strong>，不含结尾的 <code>'\0'</code><br>
+      结果 = <strong>5</strong>
+    </div>
+    <div class="analysis-trap">
+      ⚠️ 常见混淆：<code>"Hello"</code> 占 6 个字节（H e l l o \0），但 length() 只统计字符数，返回 5。
+    </div>
+    <div class="analysis-conclusion">✅ 答案：B · 5</div>
+  </div>
+  </div>
+</div>
+
+<!-- Q3 -->
+<div class="q-card">
+  <div class="q-card-inner">
+  <div class="q-left">
+    <div class="q-num">3</div>
+    <div class="q-text">下列哪个函数可以用来获取 C 风格字符串的长度？</div>
+    <div class="q-options">
+      <div class="q-option"><span class="opt-letter">A</span><span class="opt-text"><code>len()</code></span></div>
+      <div class="q-option"><span class="opt-letter">B</span><span class="opt-text"><code>size()</code></span></div>
+      <div class="q-option correct"><span class="opt-letter">C</span><span class="opt-text"><code>strlen()</code></span></div>
+      <div class="q-option"><span class="opt-letter">D</span><span class="opt-text"><code>length()</code></span></div>
+    </div>
+  </div>
+  <div class="q-right">
+    <div class="analysis-badge">✏️ 解析</div>
+    <div class="analysis-step">
+      <strong>C.</strong> <code>strlen()</code> → 获取 C 风格字符串（<code>const char*</code>）的长度 ✓<br>
+      <strong>A.</strong> <code>len()</code> → 不存在的函数 ✗<br>
+      <strong>B/D.</strong> <code>size/length()</code> → C++ string 的成员函数，不适用于 C 风格字符串
+    </div>
+    <div class="analysis-note">
+      💡 <strong>区分：</strong><code>strlen(s)</code> 用于 C 风格字符串，<code>s.length()</code> 用于 C++ string 对象。
+    </div>
+    <div class="analysis-conclusion">✅ 答案：C</div>
+  </div>
+  </div>
+</div>
+
+<!-- Q4 -->
+<div class="q-card">
+  <div class="q-card-inner">
+  <div class="q-left">
+    <div class="q-num">4</div>
+    <div class="q-text">若有 <code>string s1 = "abc", s2 = "def";</code>，则 <code>s1 + s2</code> 的结果是（ ）</div>
+    <div class="q-options">
+      <div class="q-option correct"><span class="opt-letter">A</span><span class="opt-text"><code>"abcdef"</code></span></div>
+      <div class="q-option"><span class="opt-letter">B</span><span class="opt-text"><code>"abc def"</code></span></div>
+      <div class="q-option"><span class="opt-letter">C</span><span class="opt-text"><code>"abc+def"</code></span></div>
+      <div class="q-option"><span class="opt-letter">D</span><span class="opt-text">编译错误</span></div>
+    </div>
+  </div>
+  <div class="q-right">
+    <div class="analysis-badge">✏️ 解析</div>
+    <div class="analysis-body">
+      C++ string 支持 <code>+</code> 运算符进行字符串<strong>拼接</strong>。
+    </div>
+    <div class="analysis-step">
+      s1 = <code>"abc"</code>，s2 = <code>"def"</code><br>
+      s1 + s2 → <strong>"abcdef"</strong>
+    </div>
+    <div class="analysis-trap">
+      ⚠️ B 选项多了空格、C 选项多了加号。<br>
+      <strong>注意：</strong>C 风格字符串（<code>char*</code>）不能直接用 <code>+</code> 拼接。
+    </div>
+    <div class="analysis-conclusion">✅ 答案：A · "abcdef"</div>
+  </div>
+  </div>
+</div>
+
+<!-- Q5 -->
+<div class="q-card">
+  <div class="q-card-inner">
+  <div class="q-left">
+    <div class="q-num">5</div>
+    <div class="q-text">在C++中，字符串 <code>"123"</code> 和字符串 <code>"123 "</code>（末尾有空格）进行比较（==）的结果是（ ）</div>
+    <div class="q-options">
+      <div class="q-option"><span class="opt-letter">A</span><span class="opt-text">true</span></div>
+      <div class="q-option correct"><span class="opt-letter">B</span><span class="opt-text">false</span></div>
+      <div class="q-option"><span class="opt-letter">C</span><span class="opt-text">编译错误</span></div>
+      <div class="q-option"><span class="opt-letter">D</span><span class="opt-text">运行时错误</span></div>
+    </div>
+  </div>
+  <div class="q-right">
+    <div class="analysis-badge">✏️ 解析</div>
+    <div class="analysis-body">
+      <code>"123"</code> 和 <code>"123 "</code> 长度不同，空格也是字符。
+    </div>
+    <div class="analysis-step">
+      <code>"123"</code> → 3个字符：'1','2','3'<br>
+      <code>"123 "</code> → 4个字符：'1','2','3',' '<br>
+      长度不同，== 比较结果 = <strong>false</strong>
+    </div>
+    <div class="analysis-note">
+      💡 字符串比较是逐字符比较，遇到第一个不同的字符即返回结果。
+    </div>
+    <div class="analysis-conclusion">✅ 答案：B · false</div>
+  </div>
+  </div>
+</div>
+
+<!-- Q6 -->
+<div class="q-card">
+  <div class="q-card-inner">
+  <div class="q-left">
+    <div class="q-num">6</div>
+    <div class="q-text">若有 <code>string s = "Hello";</code>，则 <code>s[1]</code> 的值是（ ）</div>
+    <div class="q-options">
+      <div class="q-option"><span class="opt-letter">A</span><span class="opt-text"><code>'H'</code></span></div>
+      <div class="q-option correct"><span class="opt-letter">B</span><span class="opt-text"><code>'e'</code></span></div>
+    </div>
+  </div>
+  <div class="q-right">
+    <div class="analysis-badge">✏️ 解析</div>
+    <div class="analysis-body">
+      string 下标从 <strong>0 开始</strong>：
+    </div>
+    <div class="analysis-step">
+      s[0] = <code>'H'</code>，s[1] = <code>'e'</code>，s[2] = <code>'l'</code>，s[3] = <code>'l'</code>，s[4] = <code>'o'</code><br>
+      <strong>s[1] = 'e'</strong>
+    </div>
+    <div class="analysis-trap">
+      ⚠️ <strong>易错点：</strong>下标从 0 开始，不是从 1 开始。
+    </div>
+    <div class="analysis-conclusion">✅ 答案：B · 'e'</div>
+  </div>
+  </div>
+</div>
+
+<!-- Q7 -->
+<div class="q-card">
+  <div class="q-card-inner">
+  <div class="q-left">
+    <div class="q-num">7</div>
+    <div class="q-text">对于 <code>string s = "C++ Programming";</code>，执行 <code>s.substr(4, 3)</code> 的结果是（ ）</div>
+    <div class="q-options">
+      <div class="q-option correct"><span class="opt-letter">A</span><span class="opt-text"><code>"Pro"</code></span></div>
+      <div class="q-option"><span class="opt-letter">B</span><span class="opt-text"><code>" Pro"</code></span></div>
+      <div class="q-option"><span class="opt-letter">C</span><span class="opt-text"><code>"Prog"</code></span></div>
+      <div class="q-option"><span class="opt-letter">D</span><span class="opt-text"><code>"Pro "</code></span></div>
+    </div>
+  </div>
+  <div class="q-right">
+    <div class="analysis-badge">✏️ 解析</div>
+    <div class="analysis-body">
+      <code>substr(pos, len)</code> 从位置 pos 开始，截取 len 个字符。
+    </div>
+    <div class="analysis-step">
+      <code>"C++ Programming"</code> 下标：0='C', 1='+', 2='+', 3=' ', 4='P', 5='r', 6='o', 7='g', ...<br>
+      <code>substr(4, 3)</code> → 从下标4取3个字符 → <strong>"Pro"</strong>
+    </div>
+    <div class="analysis-note">
+      💡 B 选项多了一个空格（误把空格算进去）<br>
+      <strong>substr 格式：</strong><code>substr(起始位置, 字符个数)</code>
+    </div>
+    <div class="analysis-conclusion">✅ 答案：A · "Pro"</div>
+  </div>
+  </div>
+</div>
+
+<!-- Q8 -->
+<div class="q-card">
+  <div class="q-card-inner">
+  <div class="q-left">
+    <div class="q-num">8</div>
+    <div class="q-text">下列哪个函数用于在 string 对象中查找子串第一次出现的位置？</div>
+    <div class="q-options">
+      <div class="q-option correct"><span class="opt-letter">A</span><span class="opt-text"><code>find()</code></span></div>
+      <div class="q-option"><span class="opt-letter">B</span><span class="opt-text"><code>search()</code></span></div>
+      <div class="q-option"><span class="opt-letter">C</span><span class="opt-text"><code>locate()</code></span></div>
+      <div class="q-option"><span class="opt-letter">D</span><span class="opt-text"><code>index()</code></span></div>
+    </div>
+  </div>
+  <div class="q-right">
+    <div class="analysis-badge">✏️ 解析</div>
+    <div class="analysis-step">
+      <strong>A.</strong> <code>find()</code> → C++ string 标准成员函数 ✓<br>
+      <strong>B.</strong> <code>search()</code> → 算法库函数，不直接属于 string<br>
+      <strong>C.</strong> <code>locate()</code> → 不存在此函数 ✗<br>
+      <strong>D.</strong> <code>index()</code> → 不存在于 string 标准库 ✗
+    </div>
+    <div class="analysis-note">
+      💡 <strong>find 返回值：</strong>找到返回下标（size_t），找不到返回 <code>string::npos</code>
+    </div>
+    <div class="analysis-conclusion">✅ 答案：A</div>
+  </div>
+  </div>
+</div>
+
+<!-- Q9 -->
+<div class="q-card">
+  <div class="q-card-inner">
+  <div class="q-left">
+    <div class="q-num">9</div>
+    <div class="q-text">若 <code>string s = "aabbaa";</code>，执行 <code>s.find("bb")</code> 返回的值是（ ）</div>
+    <div class="q-options">
+      <div class="q-option"><span class="opt-letter">A</span><span class="opt-text">1</span></div>
+      <div class="q-option correct"><span class="opt-letter">B</span><span class="opt-text">2</span></div>
+      <div class="q-option"><span class="opt-letter">C</span><span class="opt-text">3</span></div>
+      <div class="q-option"><span class="opt-letter">D</span><span class="opt-text">4</span></div>
+    </div>
+  </div>
+  <div class="q-right">
+    <div class="analysis-badge">✏️ 解析</div>
+    <div class="analysis-body">
+      <code>find()</code> 返回子串<strong>首次出现</strong>的下标（从 0 开始）。
+    </div>
+    <div class="analysis-step">
+      <code>"aabbaa"</code> 下标：0='a', 1='a', 2='b', 3='b', 4='a', 5='a'<br>
+      <code>find("bb")</code> → "bb" 首次出现在下标 <strong>2</strong>
+    </div>
+    <div class="analysis-trap">
+      ⚠️ A 选项 1 = 从1开始数（错误地从1计数）
+    </div>
+    <div class="analysis-conclusion">✅ 答案：B · 2</div>
+  </div>
+  </div>
+</div>
+
+<!-- Q10 -->
+<div class="q-card">
+  <div class="q-card-inner">
+  <div class="q-left">
+    <div class="q-num">10</div>
+    <div class="q-text">下列代码片段中，正确的是（ ）</div>
+    <div class="q-options">
+      <div class="q-option"><span class="opt-letter">A</span><span class="opt-text"><code>string s; s = "Hello";</code></span></div>
+      <div class="q-option"><span class="opt-letter">B</span><span class="opt-text"><code>string s = "Hello";</code></span></div>
+      <div class="q-option"><span class="opt-letter">C</span><span class="opt-text"><code>string s("Hello");</code></span></div>
+      <div class="q-option correct"><span class="opt-letter">D</span><span class="opt-text">以上都可以</span></div>
+    </div>
+  </div>
+  <div class="q-right">
+    <div class="analysis-badge">✏️ 解析</div>
+    <div class="analysis-body">
+      C++ string 有三种初始化方式，全部合法：
+    </div>
+    <div class="analysis-step">
+      <strong>A.</strong> 先定义后赋值：<code>string s; s = "Hello";</code> ✓<br>
+      <strong>B.</strong> 定义时初始化：<code>string s = "Hello";</code> ✓<br>
+      <strong>C.</strong> 构造函数方式：<code>string s("Hello");</code> ✓
+    </div>
+    <div class="analysis-conclusion">✅ 答案：D · 以上都可以</div>
+  </div>
+  </div>
+</div>
+
+<!-- Q11 -->
+<div class="q-card">
+  <div class="q-card-inner">
+  <div class="q-left">
+    <div class="q-num">11</div>
+    <div class="q-text">对于 <code>string s = "abcdef";</code>，执行 <code>s.replace(2, 3, "XYZ")</code> 后，s 的值是（ ）</div>
+    <div class="q-options">
+      <div class="q-option correct"><span class="opt-letter">A</span><span class="opt-text"><code>"abXYZf"</code></span></div>
+      <div class="q-option"><span class="opt-letter">B</span><span class="opt-text"><code>"abXYZef"</code></span></div>
+      <div class="q-option"><span class="opt-letter">C</span><span class="opt-text"><code>"XYZdef"</code></span></div>
+      <div class="q-option"><span class="opt-letter">D</span><span class="opt-text"><code>"abXYZ"</code></span></div>
+    </div>
+  </div>
+  <div class="q-right">
+    <div class="analysis-badge">✏️ 解析</div>
+    <div class="analysis-body">
+      <code>replace(pos, len, str)</code>：从位置 pos 开始，删除 len 个字符，然后插入 str。
+    </div>
+    <div class="analysis-step">
+      <code>"abcdef"</code> 下标：0='a', 1='b', 2='c', 3='d', 4='e', 5='f'<br>
+      <code>replace(2, 3, "XYZ")</code> → 从下标2删除3个字符（c,d,e），插入 "XYZ"<br>
+      结果：<strong>"abXYZf"</strong>
+    </div>
+    <div class="analysis-note">
+      💡 <strong>replace 格式：</strong><code>replace(起始位置, 删除个数, 替换字符串)</code>
+    </div>
+    <div class="analysis-conclusion">✅ 答案：A · "abXYZf"</div>
+  </div>
+  </div>
+</div>
+
+<!-- Q12 -->
+<div class="q-card">
+  <div class="q-card-inner">
+  <div class="q-left">
+    <div class="q-num">12</div>
+    <div class="q-text">C++代码 <code>string s = "GESP考试";</code>，s 占据的字节数是（ ）</div>
+    <div class="q-options">
+      <div class="q-option"><span class="opt-letter">A</span><span class="opt-text">10</span></div>
+      <div class="q-option"><span class="opt-letter">B</span><span class="opt-text">8</span></div>
+      <div class="q-option"><span class="opt-letter">C</span><span class="opt-text">8或10</span></div>
+      <div class="q-option correct"><span class="opt-letter">D</span><span class="opt-text">取决于计算机采用什么编码</span></div>
+    </div>
+  </div>
+  <div class="q-right">
+    <div class="analysis-badge">✏️ 解析</div>
+    <div class="analysis-body">
+      中文字符在不同编码下占不同字节数：
+    </div>
+    <div class="analysis-step">
+      ASCII（英文/符号）：每个字符占 <strong>1 字节</strong><br>
+      GBK 编码：每个中文字占 <strong>2 字节</strong><br>
+      UTF-8 编码："GESP"=4字节 + "考试"=6字节（每汉字3字节）= <strong>10字节</strong>
+    </div>
+    <div class="analysis-note">
+      💡 <strong>字节数取决于编码方式。</strong>
+    </div>
+    <div class="analysis-conclusion">✅ 答案：D</div>
+  </div>
+  </div>
+</div>
+
+<!-- Q13 -->
+<div class="q-card">
+  <div class="q-card-inner">
+  <div class="q-left">
+    <div class="q-num">13</div>
+    <div class="q-text">字符串 <code>"Gesp考试"</code>，字符数是（ ）</div>
+    <div class="q-options">
+      <div class="q-option"><span class="opt-letter">A</span><span class="opt-text">10</span></div>
+      <div class="q-option"><span class="opt-letter">B</span><span class="opt-text">8</span></div>
+      <div class="q-option correct"><span class="opt-letter">C</span><span class="opt-text">6</span></div>
+    </div>
+  </div>
+  <div class="q-right">
+    <div class="analysis-badge">✏️ 解析</div>
+    <div class="analysis-body">
+      <code>"Gesp考试"</code> 字符拆解：G-e-s-p-考-试
+    </div>
+    <div class="analysis-step">
+      英文字母：G, e, s, p → <strong>4 个</strong><br>
+      中文字符：考, 试 → <strong>2 个</strong><br>
+      总字符数 = <strong>6</strong>
+    </div>
+    <div class="analysis-trap">
+      ⚠️ A 选项 10 = UTF-8 字节数，B 选项 8 = GBK 字节数<br>
+      <strong>字符数 ≠ 字节数！</strong>这是本题的核心考点。
+    </div>
+    <div class="analysis-conclusion">✅ 答案：C · 6</div>
+  </div>
+  </div>
+</div>
+
+<!-- Q14 -->
+<div class="q-card">
+  <div class="q-card-inner">
+  <div class="q-left">
+    <div class="q-num">14</div>
+    <div class="q-text">下面程序最后能够得到 <code>"HelloC++"</code> 的是（ ）</div>
+    <div class="q-code"><span class="tp">int</span> <span class="fn">main</span>() {
+    <span class="tp">string</span> str = <span class="st">"HelloWorld"</span>;
+    <span class="cmt">// 此处为需要选择的代码行</span>
+    <span class="fn">cout</span> <span class="op">&lt;&lt;</span> str;
+    <span class="kw">return</span> <span class="num">0</span>;
+}</div>
+    <div class="q-options">
+      <div class="q-option"><span class="opt-letter">A</span><span class="opt-text"><code>str.replace(0, 5, "C++");</code></span></div>
+      <div class="q-option correct"><span class="opt-letter">B</span><span class="opt-text"><code>str.replace(5, 5, "C++");</code></span></div>
+      <div class="q-option"><span class="opt-letter">C</span><span class="opt-text"><code>str.replace(1, 5, "C++");</code></span></div>
+      <div class="q-option"><span class="opt-letter">D</span><span class="opt-text"><code>str.replace(4, 5, "C++");</code></span></div>
+    </div>
+  </div>
+  <div class="q-right">
+    <div class="analysis-badge">✏️ 解析</div>
+    <div class="analysis-body">
+      原字符串 <code>"HelloWorld"</code> 共10个字符，下标 0~9。
+    </div>
+    <div class="analysis-step">
+      <strong>下标分布：</strong>H(0) e(1) l(2) l(3) o(4) | W(5) o(6) r(7) l(8) d(9)<br><br>
+      <strong>A.</strong> <code>replace(0, 5, "C++")</code> → 从下标0删5个（"Hello"），插"C++" → <strong>"C++World"</strong> ✗<br>
+      <strong>B.</strong> <code>replace(5, 5, "C++")</code> → 从下标5删5个（"World"），插"C++" → <strong>"HelloC++"</strong> ✓<br>
+      <strong>C.</strong> <code>replace(1, 5, "C++")</code> → 从下标1删5个（"elloW"），插"C++" → <strong>"HC++orld"</strong> ✗<br>
+      <strong>D.</strong> <code>replace(4, 5, "C++")</code> → 从下标4删5个（"oWorl"），插"C++" → <strong>"HellC++d"</strong> ✗
+    </div>
+    <div class="analysis-note">
+      💡 <strong>关键：</strong><code>replace(pos, len, str)</code> 三个参数分别是起始位置、删除长度、替换字符串。"HelloWorld" 中 "World" 从下标5开始，长度恰好5，用 "C++" 替换即可得到 "HelloC++"。
+    </div>
+    <div class="analysis-conclusion">✅ 答案：B · replace(5, 5, "C++")</div>
+  </div>
+  </div>
+</div>
+
+<!-- Q15 -->
+<div class="q-card">
+  <div class="q-card-inner">
+  <div class="q-left">
+    <div class="q-num">15</div>
+    <div class="q-text">对于 <code>string s = "abcdefg";</code>，执行 <code>s.erase(2, 3);</code> 后，s 的值是（ ）</div>
+    <div class="q-options">
+      <div class="q-option correct"><span class="opt-letter">A</span><span class="opt-text"><code>"abfg"</code></span></div>
+      <div class="q-option"><span class="opt-letter">B</span><span class="opt-text"><code>"abefg"</code></span></div>
+      <div class="q-option"><span class="opt-letter">C</span><span class="opt-text"><code>"abcg"</code></span></div>
+      <div class="q-option"><span class="opt-letter">D</span><span class="opt-text"><code>"abdefg"</code></span></div>
+    </div>
+  </div>
+  <div class="q-right">
+    <div class="analysis-badge">✏️ 解析</div>
+    <div class="analysis-body">
+      <code>erase(pos, len)</code>：从位置 pos 开始，删除 len 个字符。
+    </div>
+    <div class="analysis-step">
+      <code>"abcdefg"</code> 下标：0='a', 1='b', 2='c', 3='d', 4='e', 5='f', 6='g'<br>
+      <code>erase(2, 3)</code> → 从下标2删除3个字符（c,d,e）<br>
+      结果：<strong>"abfg"</strong>
+    </div>
+    <div class="analysis-note">
+      💡 <strong>erase 格式：</strong><code>erase(起始位置, 删除个数)</code>
+    </div>
+    <div class="analysis-conclusion">✅ 答案：A · "abfg"</div>
+  </div>
+  </div>
+</div>
+
+<!-- Q16 判断题 -->
+<div class="q-card">
+  <div class="q-card-inner">
+  <div class="q-left">
+    <div class="q-num">16</div>
+    <div class="q-text">C++中 string 的 == 运算符比较的是字符串的内存地址，而非内容。</div>
+    <div class="judge-opts">
+      <div class="judge-opt">✓ 正确</div>
+      <div class="judge-opt correct">✗ 错误</div>
+    </div>
+  </div>
+  <div class="q-right">
+    <div class="analysis-badge">✏️ 解析</div>
+    <div class="analysis-body">
+      <strong>这道题的说法是错误的。</strong>
+    </div>
+    <div class="analysis-step">
+      string 的 == 运算符比较的是字符串的<strong>内容</strong>，不是内存地址<br>
+      即使两个 string 对象地址不同，只要内容相同，== 就返回 true
+    </div>
+    <div class="analysis-note">
+      💡 <strong>区分：</strong><br>
+      <code>string a = "abc", b = "abc";</code><br>
+      a == b → <strong>true</strong>（比较内容）<br>
+      &a == &b → <strong>false</strong>（比较地址）
+    </div>
+    <div class="analysis-conclusion">✅ 答案：✗ 错误</div>
+  </div>
+  </div>
+</div>
+
+<!-- Q17 判断题 -->
+<div class="q-card">
+  <div class="q-card-inner">
+  <div class="q-left">
+    <div class="q-num">17</div>
+    <div class="q-text">string 的 <code>substr(1, 3)</code> 返回从下标1开始的3个字符的子串。</div>
+    <div class="judge-opts">
+      <div class="judge-opt correct">✓ 正确</div>
+      <div class="judge-opt">✗ 错误</div>
+    </div>
+  </div>
+  <div class="q-right">
+    <div class="analysis-badge">✏️ 解析</div>
+    <div class="analysis-body">
+      <code>substr(pos, len)</code> 的参数含义：
+    </div>
+    <div class="analysis-step">
+      pos：起始位置（下标，从0开始）<br>
+      len：截取字符的<strong>个数</strong><br>
+      <code>substr(1, 3)</code> → 从下标1开始，取3个字符 ✓
+    </div>
+    <div class="analysis-note">
+      💡 举例：<code>"Hello"</code> 调用 substr(1,3) → "ell"
+    </div>
+    <div class="analysis-conclusion">✅ 答案：✓ 正确</div>
+  </div>
+  </div>
+</div>
+
+<!-- Q18 判断题 -->
+<div class="q-card">
+  <div class="q-card-inner">
+  <div class="q-left">
+    <div class="q-num">18</div>
+    <div class="q-text"><code>string("hello") == "hello"</code> 的比较结果为 true。</div>
+    <div class="judge-opts">
+      <div class="judge-opt correct">✓ 正确</div>
+      <div class="judge-opt">✗ 错误</div>
+    </div>
+  </div>
+  <div class="q-right">
+    <div class="analysis-badge">✏️ 解析</div>
+    <div class="analysis-body">
+      <strong>这个说法是正确的。</strong>
+    </div>
+    <div class="analysis-step">
+      <code>string("hello")</code> 创建了一个 string 对象<br>
+      右侧 <code>"hello"</code> 在比较时会<strong>自动转换</strong>为 string 对象<br>
+      两边内容相同，== 比较结果为 <strong>true</strong>
+    </div>
+    <div class="analysis-note">
+      💡 C++ 重载了 == 运算符，使其比较字符串内容，而非指针地址。
+    </div>
+    <div class="analysis-conclusion">✅ 答案：✓ 正确</div>
+  </div>
+  </div>
+</div>
+
+<!-- Q19 判断题 -->
+<div class="q-card">
+  <div class="q-card-inner">
+  <div class="q-left">
+    <div class="q-num">19</div>
+    <div class="q-text">C++中，string 类型的字符串末尾一定包含 <code>'\0'</code> 字符。</div>
+    <div class="judge-opts">
+      <div class="judge-opt">✓ 正确</div>
+      <div class="judge-opt correct">✗ 错误</div>
+    </div>
+  </div>
+  <div class="q-right">
+    <div class="analysis-badge">✏️ 解析</div>
+    <div class="analysis-body">
+      <strong>这个说法是错误的。</strong>
+    </div>
+    <div class="analysis-step">
+      C++ string 是<strong>高级字符串类</strong>，内部自己管理内存，不依赖 <code>'\0'</code> 作为结束标记<br>
+      string 用 <code>length()</code> / <code>size()</code> 记录长度，不需要用 <code>'\0'</code> 判断结尾
+    </div>
+    <div class="analysis-note">
+      💡 <strong>区分：</strong><br>
+      C++ string：不需要 '\0' 结尾，长度由对象属性决定<br>
+      C 风格字符串：必须以 <code>'\0'</code> 结尾，否则无法判断长度
+    </div>
+    <div class="analysis-conclusion">✅ 答案：✗ 错误</div>
+  </div>
+  </div>
+</div>
+
+<!-- Q20 判断题 -->
+<div class="q-card">
+  <div class="q-card-inner">
+  <div class="q-left">
+    <div class="q-num">20</div>
+    <div class="q-text">string 对象的 <code>size()</code> 和 <code>length()</code> 方法返回的值总是相同的。</div>
+    <div class="judge-opts">
+      <div class="judge-opt correct">✓ 正确</div>
+      <div class="judge-opt">✗ 错误</div>
+    </div>
+  </div>
+  <div class="q-right">
+    <div class="analysis-badge">✏️ 解析</div>
+    <div class="analysis-body">
+      <strong>这个说法是正确的。</strong>
+    </div>
+    <div class="analysis-step">
+      <code>size()</code> 和 <code>length()</code> 在 C++ string 中是<strong>完全等价</strong>的<br>
+      length() 是 string 类为了符合人类习惯而额外提供的<br>
+      size() 是从 STL 容器继承来的接口，两者底层调用的<strong>是同一个函数</strong>
+    </div>
+    <div class="analysis-note">
+      💡 所以 <code>s.size() == s.length()</code> 恒成立。
+    </div>
+    <div class="analysis-conclusion">✅ 答案：✓ 正确</div>
+  </div>
+  </div>
+</div>
+
+</div>
+
+</body>
+</html>
