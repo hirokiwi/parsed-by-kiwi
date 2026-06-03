@@ -679,41 +679,35 @@
   <div class="q-left">
     <div class="q-num">14</div>
     <div class="q-text">下面程序最后能够得到 <code>"HelloC++"</code> 的是（ ）</div>
-    <div class="q-code"><span class="cmt">// 程序1</span>
-<span class="tp">string</span> str = <span class="st">"Hello"</span>;
-str.<span class="fn">replace</span>(<span class="num">0</span>, <span class="num">5</span>, <span class="st">"HelloC+"</span>);
-<span class="fn">cout</span> <span class="op">&lt;&lt;</span> str;
-
-<span class="cmt">// 程序2</span>
-<span class="tp">string</span> str = <span class="st">"Hello"</span>;
-str.<span class="fn">replace</span>(<span class="num">5</span>, <span class="num">5</span>, <span class="st">"C++"</span>);
-<span class="fn">cout</span> <span class="op">&lt;&lt;</span> str;
-
-<span class="cmt">// 程序3</span>
-<span class="tp">string</span> str = <span class="st">"Hello"</span>;
-str.<span class="fn">replace</span>(<span class="num">1</span>, <span class="num">5</span>, <span class="st">"C++"</span>);
-<span class="fn">cout</span> <span class="op">&lt;&lt;</span> str;
-
-<span class="cmt">// 程序4</span>
-<span class="tp">string</span> str = <span class="st">"HelloC++World"</span>;
-str.<span class="fn">replace</span>(<span class="num">5</span>, <span class="num">5</span>, <span class="st">""</span>);
-<span class="fn">cout</span> <span class="op">&lt;&lt;</span> str;</div>
+    <div class="q-code"><span class="tp">int</span> <span class="fn">main</span>() {
+    <span class="tp">string</span> str = <span class="st">"HelloWorld"</span>;
+    <span class="cmt">// 此处为需要选择的代码行</span>
+    <span class="fn">cout</span> <span class="op">&lt;&lt;</span> str;
+    <span class="kw">return</span> <span class="num">0</span>;
+}</div>
     <div class="q-options">
-      <div class="q-option"><span class="opt-letter">A</span><span class="opt-text">第1个程序</span></div>
-      <div class="q-option correct"><span class="opt-letter">B</span><span class="opt-text">第2个程序</span></div>
-      <div class="q-option"><span class="opt-letter">C</span><span class="opt-text">第3个程序</span></div>
-      <div class="q-option"><span class="opt-letter">D</span><span class="opt-text">第4个程序</span></div>
+      <div class="q-option"><span class="opt-letter">A</span><span class="opt-text"><code>str.replace(0, 5, "C++");</code></span></div>
+      <div class="q-option correct"><span class="opt-letter">B</span><span class="opt-text"><code>str.replace(5, 5, "C++");</code></span></div>
+      <div class="q-option"><span class="opt-letter">C</span><span class="opt-text"><code>str.replace(1, 5, "C++");</code></span></div>
+      <div class="q-option"><span class="opt-letter">D</span><span class="opt-text"><code>str.replace(4, 5, "C++");</code></span></div>
     </div>
   </div>
   <div class="q-right">
     <div class="analysis-badge">✏️ 解析</div>
-    <div class="analysis-step">
-      <strong>A.</strong> replace(0,5,"HelloC+") → "Hello"长度5，从0删5个=删全部，插"HelloC+" → "HelloC+" ✗（少一个+）<br>
-      <strong>B.</strong> replace(5,5,"C++") → "Hello"长度5，下标5指向末尾，追加"C++" → "HelloC++" ✓<br>
-      <strong>C.</strong> replace(1,5,"C++") → 从下标1删5个（"ello"），剩"H"，插"C++" → "HC++" ✗<br>
-      <strong>D.</strong> replace(5,5,"") → "HelloC++World"，从下标5删5个字符（C++），插空 → "HelloWorld" ✗
+    <div class="analysis-body">
+      原字符串 <code>"HelloWorld"</code> 共10个字符，下标 0~9。
     </div>
-    <div class="analysis-conclusion">✅ 答案：B · 第2个程序</div>
+    <div class="analysis-step">
+      <strong>下标分布：</strong>H(0) e(1) l(2) l(3) o(4) | W(5) o(6) r(7) l(8) d(9)<br><br>
+      <strong>A.</strong> <code>replace(0, 5, "C++")</code> → 从下标0删5个（"Hello"），插"C++" → <strong>"C++World"</strong> ✗<br>
+      <strong>B.</strong> <code>replace(5, 5, "C++")</code> → 从下标5删5个（"World"），插"C++" → <strong>"HelloC++"</strong> ✓<br>
+      <strong>C.</strong> <code>replace(1, 5, "C++")</code> → 从下标1删5个（"elloW"），插"C++" → <strong>"HC++orld"</strong> ✗<br>
+      <strong>D.</strong> <code>replace(4, 5, "C++")</code> → 从下标4删5个（"oWorl"），插"C++" → <strong>"HellC++d"</strong> ✗
+    </div>
+    <div class="analysis-note">
+      💡 <strong>关键：</strong><code>replace(pos, len, str)</code> 三个参数分别是起始位置、删除长度、替换字符串。"HelloWorld" 中 "World" 从下标5开始，长度恰好5，用 "C++" 替换即可得到 "HelloC++"。
+    </div>
+    <div class="analysis-conclusion">✅ 答案：B · replace(5, 5, "C++")</div>
   </div>
   </div>
 </div>
