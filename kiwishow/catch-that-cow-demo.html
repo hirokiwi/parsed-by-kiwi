@@ -1,0 +1,1237 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>P1588 Catch That Cow S - 交互演示</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#1a1a26;--border:rgba(255,255,255,0.1);
+  --text:#f1f5f9;--muted:#94a3b8;
+  --orange:#f97316;--orange-glow:rgba(249,115,22,0.4);
+  --green:#4ade80;--green-glow:rgba(74,222,128,0.3);
+  --red:#f87171;--cyan:#22d3ee;--cyan-glow:rgba(34,211,238,0.3);
+  --yellow:#fbbf24;--purple:#a78bfa;
+  --lineY:52%;
+}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;height:100vh;overflow:hidden;display:flex;flex-direction:column}
+
+/* ===== Scene ===== */
+.scene{flex:1;position:relative;overflow:hidden;user-select:none}
+.scene::before{content:'';position:absolute;inset:0;
+  background-image:linear-gradient(rgba(255,255,255,0.018) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.018) 1px,transparent 1px);
+  background-size:40px 40px;pointer-events:none;z-index:0}
+.scene::after{content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 50% 40% at 50% 50%,rgba(34,211,238,0.03),transparent 70%),
+             radial-gradient(ellipse 40% 30% at 25% 45%,rgba(249,115,22,0.03),transparent);
+  pointer-events:none;z-index:0}
+
+.stars{position:absolute;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.star{position:absolute;border-radius:50%;background:#fff;animation:twinkle var(--dur) ease-in-out infinite alternate}
+@keyframes twinkle{0%{opacity:0.12;transform:scale(1)}100%{opacity:0.5;transform:scale(1.3)}}
+
+.ground-band{position:absolute;left:0;right:0;height:50px;z-index:2;top:calc(var(--lineY) + 26px)}
+.ground-grass{position:absolute;top:0;left:0;right:0;height:8px;background:linear-gradient(to bottom,#2a5e14,#1d4a0d);border-top:2px solid #3a7a1e}
+.ground-dirt{position:absolute;top:8px;left:0;right:0;bottom:0;background:linear-gradient(to bottom,#3d2510,#2a1a0a)}
+
+/* Number line */
+.number-line{position:absolute;left:70px;right:70px;height:2px;background:rgba(255,255,255,0.2);z-index:3;top:var(--lineY)}
+.tick{position:absolute;top:-3px;width:1px;height:8px;background:rgba(255,255,255,0.25);z-index:3}
+.tick-label{position:absolute;top:12px;font-size:10px;color:var(--muted);opacity:0.45;transform:translateX(-50%);white-space:nowrap}
+
+/* ===== Explored nodes ===== */
+.explored-dot{position:absolute;border-radius:50%;z-index:6;
+  transform:translate(-50%,-50%);opacity:0;pointer-events:none;
+  transition:opacity 0.5s,width 0.4s,height 0.4s,box-shadow 0.4s}
+.explored-dot.pop{animation:dotPop 0.4s cubic-bezier(.3,1.5,.6,1) forwards}
+@keyframes dotPop{0%{transform:translate(-50%,-50%) scale(0);opacity:0}100%{transform:translate(-50%,-50%) scale(1);opacity:1}}
+.explored-dot.start{background:var(--orange);box-shadow:0 0 12px var(--orange-glow);width:16px;height:16px}
+.explored-dot.plus1{background:var(--green);box-shadow:0 0 8px var(--green-glow);width:12px;height:12px}
+.explored-dot.minus1{background:var(--yellow);box-shadow:0 0 8px rgba(251,191,36,0.3);width:12px;height:12px}
+.explored-dot.times2{background:var(--cyan);box-shadow:0 0 8px var(--cyan-glow);width:13px;height:13px}
+.explored-dot.cow-dot{background:var(--red);box-shadow:0 0 14px rgba(248,113,113,0.5);width:16px;height:16px;
+  animation:dotPulse 0.8s ease-in-out infinite alternate}
+@keyframes dotPulse{0%{transform:translate(-50%,-50%) scale(1);opacity:1}100%{transform:translate(-50%,-50%) scale(1.3);opacity:0.8}}
+
+/* Old state: faded & tiny */
+.explored-dot.old{opacity:0.2 !important;width:5px !important;height:5px !important;box-shadow:none !important}
+.explored-dot.mid{opacity:0.45 !important;width:8px !important;height:8px !important;box-shadow:none !important}
+
+/* Processing ring on dequeue */
+.processing-ring{position:absolute;width:30px;height:30px;border-radius:50%;z-index:7;
+  transform:translate(-50%,-50%);pointer-events:none;border:2px solid var(--orange);opacity:0}
+.processing-ring.ring{animation:ringPulse 0.6s ease-out forwards}
+@keyframes ringPulse{0%{transform:translate(-50%,-50%) scale(0.8);opacity:0.9}100%{transform:translate(-50%,-50%) scale(2);opacity:0}}
+
+/* Position tag - auto fades */
+.pos-tag{position:absolute;font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;
+  pointer-events:none;white-space:nowrap;z-index:7;transform:translateX(-50%);
+  backdrop-filter:blur(6px);transition:opacity 0.4s,transform 0.4s}
+.pos-tag.fading{opacity:0 !important;transform:translateX(-50%) translateY(4px)}
+
+/* Dequeue tag */
+.dequeue-tag{position:absolute;font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;
+  pointer-events:none;white-space:nowrap;z-index:8;transform:translateX(-50%);
+  background:rgba(249,115,22,0.2);color:var(--orange);border:1px solid rgba(249,115,22,0.4);
+  backdrop-filter:blur(8px);opacity:0}
+.dequeue-tag.show{animation:deqTagIn 0.4s ease-out forwards}
+@keyframes deqTagIn{0%{opacity:0;transform:translateX(-50%) translateY(4px)}100%{opacity:1;transform:translateX(-50%) translateY(0)}}
+.dequeue-tag.fade{animation:deqTagOut 0.3s ease-out forwards}
+@keyframes deqTagOut{0%{opacity:1}100%{opacity:0;transform:translateX(-50%) translateY(-8px)}}
+
+/* Farmer */
+.farmer{position:absolute;z-index:10;transform:translateX(-50%);pointer-events:none;transition:left 0.15s ease-out}
+.farmer.walking{animation:farmerWalk 0.3s ease-in-out}
+@keyframes farmerWalk{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(-6px)}}
+
+/* Cow */
+.cow-target{position:absolute;z-index:9;transform:translateX(-50%);pointer-events:none}
+.cow-target svg{animation:cowIdle 2s ease-in-out infinite alternate}
+@keyframes cowIdle{0%{transform:translateY(0)}100%{transform:translateY(-5px)}}
+.cow-target.caught{animation:cowCaught 0.5s ease-out forwards}
+@keyframes cowCaught{0%{filter:none}50%{filter:brightness(1.5) drop-shadow(0 0 20px var(--green))}100%{filter:brightness(1.1) drop-shadow(0 0 12px var(--green-glow))}}
+
+/* Arrow SVG */
+#arrowSvg{position:absolute;inset:0;pointer-events:none;z-index:5}
+#arrowSvg g{transition:opacity 0.5s}
+#arrowSvg g.arrow-old{opacity:0.12 !important}
+#arrowSvg g.arrow-mid{opacity:0.35 !important}
+
+/* Path trace */
+.path-node{position:absolute;z-index:12;border-radius:50%;transform:translate(-50%,-50%);pointer-events:none;opacity:0}
+.path-node.show{animation:pathShow 0.4s cubic-bezier(.3,1.5,.6,1) forwards}
+@keyframes pathShow{0%{transform:translate(-50%,-50%) scale(0);opacity:0}100%{transform:translate(-50%,-50%) scale(1);opacity:1}}
+
+/* Info Panel */
+.info-panel{position:absolute;top:12px;left:14px;z-index:15;opacity:0.85;
+  background:rgba(10,10,20,0.6);backdrop-filter:blur(12px);border:1px solid var(--border);border-radius:10px;padding:10px 14px}
+.info-panel .title{font-size:13px;color:var(--muted);font-weight:600;margin-bottom:5px}
+.info-panel .row{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);margin:2px 0}
+.info-panel .val{font-weight:700;min-width:30px;text-align:right}
+.info-panel .val.orange{color:var(--orange)}
+.info-panel .val.green{color:var(--green)}
+.info-panel .val.cyan{color:var(--cyan)}
+.info-panel .val.red{color:var(--red)}
+
+/* Legend */
+.legend{position:absolute;top:12px;right:14px;z-index:15;opacity:0.8;
+  background:rgba(10,10,20,0.6);backdrop-filter:blur(12px);border:1px solid var(--border);border-radius:10px;padding:10px 14px}
+.legend .item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);margin:3px 0}
+.legend .dot{width:10px;height:10px;border-radius:50%}
+
+.step-badge{position:absolute;top:14px;left:50%;transform:translateX(-50%);z-index:15;font-size:12px;color:var(--muted);opacity:0.65;
+  background:rgba(10,10,20,0.5);backdrop-filter:blur(12px);border:1px solid var(--border);border-radius:8px;padding:5px 12px}
+
+.level-display{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);z-index:15;
+  font-size:13px;color:var(--muted);opacity:0;
+  background:rgba(10,10,20,0.5);backdrop-filter:blur(12px);border:1px solid var(--border);border-radius:8px;padding:5px 14px;
+  transition:opacity 0.3s;white-space:nowrap}
+.level-display.show{opacity:0.75}
+
+/* Result */
+.result-display{position:absolute;top:35%;left:50%;transform:translate(-50%,-50%);
+  text-align:center;z-index:25;opacity:0;transition:opacity 0.5s;pointer-events:none}
+.result-display.show{opacity:1}
+.result-num{font-size:76px;font-weight:900;color:var(--green);line-height:1;
+  text-shadow:0 0 50px var(--green-glow),0 0 100px rgba(74,222,128,0.2)}
+.result-sub{font-size:18px;color:var(--muted);margin-top:8px}
+.result-path{font-size:16px;color:var(--cyan);margin-top:14px;font-weight:700;
+  text-shadow:0 0 20px var(--cyan-glow);letter-spacing:2px}
+
+/* ===== Step Label (步数标签，不淡出) ===== */
+.step-label{position:absolute;font-size:11px;font-weight:900;padding:2px 6px;border-radius:5px;
+  pointer-events:none;white-space:nowrap;z-index:7;transform:translateX(-50%);
+  backdrop-filter:blur(6px);border:1px solid transparent;letter-spacing:0.3px;
+  transition:opacity 0.4s,transform 0.4s;text-shadow:0 0 6px currentColor}
+.step-label.start{background:rgba(249,115,22,0.2);color:var(--orange);border-color:rgba(249,115,22,0.3)}
+.step-label.plus1{background:rgba(74,222,128,0.15);color:var(--green);border-color:rgba(74,222,128,0.25)}
+.step-label.minus1{background:rgba(251,191,36,0.15);color:var(--yellow);border-color:rgba(251,191,36,0.25)}
+.step-label.times2{background:rgba(34,211,238,0.15);color:var(--cyan);border-color:rgba(34,211,238,0.25)}
+.step-label.mid{opacity:0.5 !important}
+.step-label.old{opacity:0.2 !important}
+.step-label.pop{animation:stepLabelPop 0.4s cubic-bezier(.3,1.5,.6,1) forwards}
+@keyframes stepLabelPop{0%{transform:translateX(-50%) scale(0);opacity:0}100%{transform:translateX(-50%) scale(1);opacity:1}}
+
+/* ===== Queue Panel ===== */
+.queue-panel{position:absolute;top:calc(var(--lineY) + 85px);left:14px;right:14px;z-index:15;
+  background:rgba(10,10,20,0.8);backdrop-filter:blur(16px);border:1px solid var(--border);border-radius:12px;
+  padding:10px 16px 12px;opacity:0;transition:opacity 0.4s;max-height:200px;overflow:hidden}
+.queue-panel.show{opacity:1}
+.queue-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.queue-title{font-size:12px;color:var(--muted);font-weight:600;letter-spacing:0.5px}
+.queue-size{font-weight:400;opacity:0.5;font-size:11px}
+.queue-processing{font-size:12px;color:var(--orange);font-weight:600}
+.queue-processing b{font-size:15px;font-weight:900}
+.queue-row{display:flex;align-items:center;gap:5px;flex-wrap:wrap;min-height:38px}
+.queue-badge{min-width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:800;flex-shrink:0;border:2px solid transparent;transition:all 0.2s;position:relative}
+.queue-badge.front{border-color:var(--orange);box-shadow:0 0 10px var(--orange-glow);animation:frontGlow 1.2s ease-in-out infinite alternate}
+@keyframes frontGlow{0%{box-shadow:0 0 6px var(--orange-glow)}100%{box-shadow:0 0 16px var(--orange-glow)}}
+.queue-badge.front::before{content:'队首';position:absolute;top:-15px;left:50%;transform:translateX(-50%);
+  font-size:9px;color:var(--orange);white-space:nowrap;opacity:0.7;font-weight:600}
+.queue-badge.plus1{background:rgba(74,222,128,0.15);color:var(--green);border-color:rgba(74,222,128,0.25)}
+.queue-badge.minus1{background:rgba(251,191,36,0.15);color:var(--yellow);border-color:rgba(251,191,36,0.25)}
+.queue-badge.times2{background:rgba(34,211,238,0.15);color:var(--cyan);border-color:rgba(34,211,238,0.25)}
+.queue-badge.start{background:rgba(249,115,22,0.15);color:var(--orange);border-color:rgba(249,115,22,0.25)}
+.queue-badge.badge-in{animation:badgePop 0.45s cubic-bezier(.3,1.5,.6,1)}
+@keyframes badgePop{0%{transform:scale(0);opacity:0}60%{transform:scale(1.25)}100%{transform:scale(1);opacity:1}}
+.queue-layer-sep{width:1px;height:28px;background:rgba(255,255,255,0.08);margin:0 3px;flex-shrink:0;position:relative}
+.queue-layer-sep::after{content:attr(data-layer);position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  font-size:8px;color:var(--muted);opacity:0.4;white-space:nowrap;background:rgba(10,10,20,0.9);padding:1px 4px;border-radius:3px}
+.queue-empty{font-size:12px;color:var(--muted);opacity:0.4;padding:8px 0;font-style:italic}
+
+/* Enqueue flash */
+.enqueue-flash{position:absolute;width:28px;height:28px;border-radius:50%;z-index:7;
+  pointer-events:none;opacity:0;transform:translate(-50%,-50%)}
+.enqueue-flash.go{animation:enqFlash 0.5s ease-out forwards}
+@keyframes enqFlash{
+  0%{opacity:0.7;transform:translate(-50%,-50%) scale(0.5);background:var(--cyan);box-shadow:0 0 20px var(--cyan)}
+  60%{opacity:0.3;transform:translate(-50%,-50%) scale(1.8);background:transparent;border:2px solid var(--cyan)}
+  100%{opacity:0;transform:translate(-50%,-50%) scale(2.5);background:transparent;border:1px solid var(--cyan)}
+}
+
+/* Controls */
+.controls{height:48px;background:rgba(0,0,0,0.35);border-top:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;gap:8px;padding:0 14px;flex-shrink:0}
+.controls button{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);
+  color:var(--muted);padding:4px 11px;border-radius:5px;cursor:pointer;font-size:12px;
+  transition:all 0.15s;outline:none}
+.controls button:hover{background:rgba(255,255,255,0.08);color:var(--text);border-color:rgba(255,255,255,0.16)}
+.controls button:active{transform:scale(0.96)}
+.controls button.active{background:rgba(249,115,22,0.12);border-color:var(--orange);color:var(--orange)}
+.controls button:disabled{opacity:0.3;cursor:default;transform:none}
+.sample-group{display:flex;gap:4px;opacity:0.55}
+.sample-group button{font-size:11px;padding:3px 8px}
+.sample-group button:hover{opacity:1}
+.sep{width:1px;height:18px;background:var(--border);margin:0 3px}
+.speed-group{display:flex;align-items:center;gap:4px;opacity:0.5;font-size:11px;color:var(--muted)}
+.speed-group input{width:55px;accent-color:var(--orange);height:3px}
+
+/* Intro */
+.intro-prompt{position:absolute;top:30%;left:50%;transform:translate(-50%,-50%);
+  text-align:center;z-index:18;pointer-events:none;transition:opacity 0.4s}
+.intro-prompt.hide{opacity:0}
+.intro-prompt .big{font-size:28px;font-weight:700;color:var(--text);margin-bottom:8px}
+.intro-prompt .small{font-size:15px;color:var(--muted)}
+
+/* Teleport flash */
+.teleport-flash{position:absolute;width:40px;height:40px;border-radius:50%;z-index:11;
+  pointer-events:none;opacity:0;transform:translate(-50%,-50%)}
+.teleport-flash.go{animation:teleportGo 0.6s ease-out forwards}
+@keyframes teleportGo{
+  0%{opacity:0.8;transform:translate(-50%,-50%) scale(0.3);background:var(--cyan);box-shadow:0 0 30px var(--cyan)}
+  50%{opacity:0.5;transform:translate(-50%,-50%) scale(1.5);background:transparent;border:3px solid var(--cyan)}
+  100%{opacity:0;transform:translate(-50%,-50%) scale(2.5);background:transparent;border:1px solid var(--cyan)}
+}
+</style>
+</head>
+<body>
+
+<div class="scene" id="scene">
+  <div class="stars" id="starsContainer"></div>
+  <div class="ground-band">
+    <div class="ground-grass"></div>
+    <div class="ground-dirt"></div>
+  </div>
+  <div class="number-line" id="numberLine"></div>
+  <div id="dotsContainer" style="position:absolute;inset:0;pointer-events:none;z-index:6"></div>
+  <div id="farmerContainer" style="position:absolute;inset:0;pointer-events:none;z-index:10"></div>
+  <div id="cowContainer" style="position:absolute;inset:0;pointer-events:none;z-index:9"></div>
+  <svg id="arrowSvg"></svg>
+  <div id="pathContainer" style="position:absolute;inset:0;pointer-events:none;z-index:12"></div>
+
+  <div class="info-panel" id="infoPanel">
+    <div class="title">BFS 搜索最短路径</div>
+    <div class="row">FJ 起点: <span class="val orange" id="infoN">5</span></div>
+    <div class="row">牛位置: <span class="val red" id="infoK">17</span></div>
+    <div class="row">当前步数: <span class="val green" id="infoStep">0</span></div>
+    <div class="row">探索位置数: <span class="val cyan" id="infoExplored">1</span></div>
+  </div>
+
+  <div class="legend">
+    <div class="item"><div class="dot" style="background:var(--green)"></div> +1 走</div>
+    <div class="item"><div class="dot" style="background:var(--yellow)"></div> -1 走</div>
+    <div class="item"><div class="dot" style="background:var(--cyan)"></div> ×2 传送</div>
+  </div>
+
+  <div class="step-badge" id="stepBadge"></div>
+  <div class="level-display" id="levelDisplay"></div>
+
+  <div class="queue-panel" id="queuePanel">
+    <div class="queue-header">
+      <span class="queue-title">BFS 队列 <span class="queue-size" id="queueSize">(1)</span></span>
+      <span class="queue-processing" id="queueProcessing"></span>
+    </div>
+    <div class="queue-row" id="queueRow"></div>
+  </div>
+
+  <div class="result-display" id="resultDisplay">
+    <div class="result-num" id="resultNum"></div>
+    <div class="result-sub">最少步数</div>
+    <div class="result-path" id="resultPath"></div>
+  </div>
+
+  <div class="intro-prompt" id="introPrompt">
+    <div class="big">🧑‍🌾 Catch That Cow!</div>
+    <div class="small">点击 ▶ 开始 BFS 搜索演示</div>
+  </div>
+</div>
+
+<div class="controls">
+  <div class="sample-group">
+    <button onclick="loadSample(1)" id="sampleBtn1">样例1</button>
+    <button onclick="loadSample(2)" id="sampleBtn2">样例2</button>
+    <button onclick="loadSample(3)" id="sampleBtn3">样例3</button>
+  </div>
+  <div class="sep"></div>
+  <button onclick="prevStep()" id="btnPrev" disabled>◀</button>
+  <button onclick="nextStep()" id="btnNext">▶</button>
+  <button onclick="resetAll()" id="btnReset">↺</button>
+  <button onclick="toggleAuto()" id="btnAuto">⏵ 自动</button>
+  <div class="sep"></div>
+  <div class="speed-group">
+    速度
+    <input type="range" min="0.3" max="3" step="0.1" value="1" id="speedSlider" oninput="updateSpeed(this.value)">
+    <span id="speedVal">1.0x</span>
+  </div>
+</div>
+
+<script>
+/* ===== State ===== */
+let N = 5, K = 17;
+let bfsSteps = [];
+let currentStep = -1;
+let isAnimating = false;
+let isAutoPlaying = false;
+let speed = 1;
+let discoveryMap = {};
+let distMap = {};
+
+// Viewport for dynamic zoom
+let vpMin = 0, vpMax = 20;
+
+const scene = document.getElementById('scene');
+const numberLine = document.getElementById('numberLine');
+const dotsContainer = document.getElementById('dotsContainer');
+const farmerContainer = document.getElementById('farmerContainer');
+const cowContainer = document.getElementById('cowContainer');
+const arrowSvg = document.getElementById('arrowSvg');
+const pathContainer = document.getElementById('pathContainer');
+
+const sampleData = {
+  1: { n: 5, k: 17 },
+  2: { n: 3, k: 11 },
+  3: { n: 8, k: 20 }
+};
+
+function loadSample(idx) {
+  if (isAnimating || isAutoPlaying) return;
+  N = sampleData[idx].n;
+  K = sampleData[idx].k;
+  document.querySelectorAll('.sample-group button').forEach((b,i) => b.classList.toggle('active', i+1===idx));
+  resetAll();
+}
+
+function createStars() {
+  const c = document.getElementById('starsContainer');
+  c.innerHTML = '';
+  for (let i = 0; i < 50; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    const size = 1 + Math.random() * 1.5;
+    s.style.cssText = `width:${size}px;height:${size}px;left:${Math.random()*100}%;top:${Math.random()*45}%;
+      --dur:${2+Math.random()*3}s;animation-delay:${Math.random()*3}s`;
+    c.appendChild(s);
+  }
+}
+
+/* ===== Dynamic Viewport ===== */
+const VIEWPORT_SIZE = 18; // number of positions visible at once
+
+function updateViewport(focusPositions) {
+  // focusPositions: array of positions that should be visible
+  const positions = [...focusPositions, N, K].filter(p => p >= 0);
+  let minP = Math.min(...positions);
+  let maxP = Math.max(...positions);
+
+  // Expand to VIEWPORT_SIZE if range is too small
+  let range = maxP - minP;
+  if (range < VIEWPORT_SIZE) {
+    const expand = (VIEWPORT_SIZE - range) / 2;
+    minP = Math.max(0, Math.floor(minP - expand));
+    maxP = Math.ceil(maxP + (VIEWPORT_SIZE - (maxP - minP)));
+  }
+
+  // Add padding
+  minP = Math.max(0, minP - 2);
+  maxP = maxP + 2;
+
+  // Smooth transition
+  vpMin = Math.round(vpMin + (minP - vpMin) * 0.5);
+  vpMax = Math.round(vpMax + (maxP - vpMax) * 0.5);
+
+  // Ensure minimum range
+  if (vpMax - vpMin < VIEWPORT_SIZE) {
+    vpMax = vpMin + VIEWPORT_SIZE;
+  }
+}
+
+function initViewport() {
+  vpMin = Math.max(0, Math.min(N, K) - 4);
+  vpMax = Math.max(N, K) + 6;
+  if (vpMax - vpMin < VIEWPORT_SIZE) vpMax = vpMin + VIEWPORT_SIZE;
+}
+
+/* ===== Coordinate Mapping ===== */
+function getLineYPx() {
+  return scene.getBoundingClientRect().height * 0.52;
+}
+
+function getLineMetrics() {
+  const sRect = scene.getBoundingClientRect();
+  const left = 70;
+  const width = sRect.width - 140;
+  return { left, width, minP: vpMin, maxP: vpMax };
+}
+
+function posToX(pos) {
+  const lm = getLineMetrics();
+  const ratio = (pos - lm.minP) / (lm.maxP - lm.minP);
+  return lm.left + ratio * lm.width;
+}
+
+/* ===== SVGs ===== */
+function farmerSVG() {
+  return `<svg width="44" height="56" viewBox="0 0 44 56">
+    <ellipse cx="22" cy="11" rx="15" ry="4" fill="#8B4513"/>
+    <rect x="13" y="3" width="18" height="9" rx="3" fill="#A0522D"/>
+    <rect x="15" y="5" width="14" height="5" rx="2" fill="#CD853F"/>
+    <circle cx="22" cy="18" r="7" fill="#FDBCB4"/>
+    <circle cx="19" cy="16" r="1.2" fill="#333"/>
+    <circle cx="25" cy="16" r="1.2" fill="#333"/>
+    <path d="M19,21 Q22,24 25,21" fill="none" stroke="#333" stroke-width="1.2" stroke-linecap="round"/>
+    <rect x="14" y="25" width="16" height="16" rx="3" fill="#4169E1"/>
+    <rect x="18" y="25" width="8" height="16" fill="#3457B5" opacity="0.4"/>
+    <rect x="6" y="27" width="9" height="4" rx="2" fill="#FDBCB4"/>
+    <rect x="29" y="27" width="9" height="4" rx="2" fill="#FDBCB4"/>
+    <rect x="15" y="41" width="6" height="10" rx="2" fill="#8B6914"/>
+    <rect x="23" y="41" width="6" height="10" rx="2" fill="#8B6914"/>
+    <rect x="14" y="48" width="8" height="5" rx="2" fill="#5C3317"/>
+    <rect x="22" y="48" width="8" height="5" rx="2" fill="#5C3317"/>
+    <line x1="35" y1="16" x2="35" y2="40" stroke="#8B6914" stroke-width="2.2"/>
+    <line x1="31" y1="16" x2="39" y2="16" stroke="#999" stroke-width="1.8"/>
+    <line x1="31" y1="16" x2="31" y2="12" stroke="#999" stroke-width="1.3"/>
+    <line x1="35" y1="16" x2="35" y2="11" stroke="#999" stroke-width="1.3"/>
+    <line x1="39" y1="16" x2="39" y2="12" stroke="#999" stroke-width="1.3"/>
+  </svg>`;
+}
+
+function cowSVG() {
+  return `<svg width="54" height="42" viewBox="0 0 54 42">
+    <ellipse cx="27" cy="23" rx="16" ry="11" fill="#faf8f0" stroke="#c8c0b0" stroke-width="1"/>
+    <ellipse cx="20" cy="21" rx="5" ry="3.8" fill="#3a3a3a" opacity="0.7"/>
+    <ellipse cx="33" cy="25" rx="4" ry="3.2" fill="#3a3a3a" opacity="0.6"/>
+    <circle cx="9" cy="17" r="6.5" fill="#faf8f0" stroke="#c8c0b0" stroke-width="1"/>
+    <ellipse cx="5" cy="20" rx="3.8" ry="2.8" fill="#ffe4c9" stroke="#d4b896" stroke-width="0.7"/>
+    <circle cx="3.8" cy="20.5" r="0.8" fill="#c8a080"/>
+    <circle cx="6" cy="20.5" r="0.8" fill="#c8a080"/>
+    <circle cx="6.5" cy="14" r="2" fill="#fff"/>
+    <circle cx="6.8" cy="13.7" r="1.2" fill="#2a2a2a"/>
+    <circle cx="7.3" cy="13.2" r="0.4" fill="#fff"/>
+    <ellipse cx="3.5" cy="11" rx="2.8" ry="2" fill="#faf8f0" stroke="#c8c0b0" stroke-width="0.7" transform="rotate(-15,3.5,11)"/>
+    <ellipse cx="13" cy="11" rx="2.8" ry="2" fill="#faf8f0" stroke="#c8c0b0" stroke-width="0.7" transform="rotate(15,13,11)"/>
+    <path d="M6,10 Q4,5 2,3" fill="none" stroke="#d4b896" stroke-width="1.6" stroke-linecap="round"/>
+    <path d="M11,10 Q13,5 15,3" fill="none" stroke="#d4b896" stroke-width="1.6" stroke-linecap="round"/>
+    <rect x="15" y="32" width="4" height="8" rx="2" fill="#faf8f0" stroke="#c8c0b0" stroke-width="0.6"/>
+    <rect x="22" y="32" width="4" height="8" rx="2" fill="#faf8f0" stroke="#c8c0b0" stroke-width="0.6"/>
+    <rect x="30" y="32" width="4" height="8" rx="2" fill="#faf8f0" stroke="#c8c0b0" stroke-width="0.6"/>
+    <rect x="37" y="32" width="4" height="8" rx="2" fill="#faf8f0" stroke="#c8c0b0" stroke-width="0.6"/>
+    <rect x="15" y="38" width="4" height="3" rx="1" fill="#3a3a3a"/>
+    <rect x="22" y="38" width="4" height="3" rx="1" fill="#3a3a3a"/>
+    <rect x="30" y="38" width="4" height="3" rx="1" fill="#3a3a3a"/>
+    <rect x="37" y="38" width="4" height="3" rx="1" fill="#3a3a3a"/>
+    <path d="M43,19 Q49,15 47,23 Q46,26 47,29" fill="none" stroke="#c8c0b0" stroke-width="1.4" stroke-linecap="round"/>
+    <ellipse cx="47.5" cy="30" rx="2" ry="2.8" fill="#3a3a3a" opacity="0.7"/>
+  </svg>`;
+}
+
+/* ===== BFS Computation ===== */
+function computeBFS() {
+  bfsSteps = [];
+  discoveryMap = {};
+  distMap = {};
+  discoveryMap[N] = 'start';
+  distMap[N] = 0;
+
+  const maxPos = Math.max(K + 5, N * 2 + 2, 20);
+  const dist = {};
+  const parent = {};
+  const queue = [N];
+  dist[N] = 0;
+  parent[N] = -1;
+
+  bfsSteps.push({
+    type: 'init', currentPos: N, dist: 0,
+    explored: new Set([N]),
+    queueArr: [N],
+    processingPos: null,
+    newEnqueued: null
+  });
+
+  let head = 0;
+  while (head < queue.length) {
+    const pos = queue[head++];
+    const d = dist[pos];
+    const queueAfterDequeue = queue.slice(head);
+
+    bfsSteps.push({
+      type: 'dequeue', pos, dist: d,
+      queueArr: queueAfterDequeue,
+      explored: new Set(Object.keys(dist).map(Number)),
+      processingPos: pos,
+      newEnqueued: null
+    });
+
+    const moves = [
+      { next: pos + 1, op: '+1', cls: 'plus1' },
+      { next: pos - 1, op: '-1', cls: 'minus1' },
+      { next: pos * 2, op: '×2', cls: 'times2' }
+    ];
+
+    for (const move of moves) {
+      const { next, op, cls } = move;
+      if (next >= 0 && next <= maxPos && !(next in dist)) {
+        dist[next] = d + 1;
+        parent[next] = pos;
+        queue.push(next);
+        discoveryMap[next] = cls;
+        distMap[next] = d + 1;
+
+        const queueAfterEnqueue = queue.slice(head);
+        bfsSteps.push({
+          type: 'explore', currentPos: pos, fromPos: pos, nextPos: next,
+          op, opCls: cls, dist: d + 1,
+          explored: new Set(Object.keys(dist).map(Number)),
+          queueArr: queueAfterEnqueue,
+          processingPos: pos,
+          newEnqueued: next,
+          foundCow: next === K
+        });
+
+        if (next === K) {
+          const path = [];
+          let p = K;
+          while (p !== -1) { path.unshift(p); p = parent[p]; }
+          bfsSteps.push({
+            type: 'found', dist: d + 1, path,
+            explored: new Set(Object.keys(dist).map(Number)),
+            queueArr: queueAfterEnqueue,
+            processingPos: pos,
+            newEnqueued: null
+          });
+          return;
+        }
+      }
+    }
+  }
+}
+
+/* ===== Render Ticks ===== */
+function renderTicks() {
+  document.querySelectorAll('.tick,.tick-label').forEach(e => e.remove());
+  const lineY = getLineYPx();
+  const lm = getLineMetrics();
+  const range = lm.maxP - lm.minP;
+  let tickStep = 1;
+  if (range > 30) tickStep = 5;
+  else if (range > 20) tickStep = 2;
+
+  for (let v = Math.ceil(lm.minP / tickStep) * tickStep; v <= lm.maxP; v += tickStep) {
+    const x = posToX(v);
+    const tick = document.createElement('div');
+    tick.className = 'tick';
+    tick.style.cssText = `position:absolute;left:${x}px;top:${lineY - 3}px;z-index:3`;
+    scene.appendChild(tick);
+    const label = document.createElement('div');
+    label.className = 'tick-label';
+    label.style.cssText = `position:absolute;left:${x}px;top:${lineY + 14}px;z-index:3`;
+    label.textContent = v;
+    scene.appendChild(label);
+  }
+}
+
+/* ===== Render Scene ===== */
+function renderScene() {
+  dotsContainer.innerHTML = '';
+  farmerContainer.innerHTML = '';
+  cowContainer.innerHTML = '';
+  arrowSvg.innerHTML = '';
+  pathContainer.innerHTML = '';
+
+  initViewport();
+  renderTicks();
+
+  const lineY = getLineYPx();
+
+  // N label
+  const nx = posToX(N);
+  const nLabel = document.createElement('div');
+  nLabel.id = 'nLabel';
+  nLabel.style.cssText = `position:absolute;left:${nx}px;top:${lineY + 32}px;transform:translateX(-50%);
+    font-size:13px;font-weight:700;color:var(--orange);z-index:7;white-space:nowrap;
+    text-shadow:0 0 8px var(--orange-glow)`;
+  nLabel.textContent = 'N=' + N;
+  dotsContainer.appendChild(nLabel);
+
+  // K label
+  const kx = posToX(K);
+  const kLabel = document.createElement('div');
+  kLabel.id = 'kLabel';
+  kLabel.style.cssText = `position:absolute;left:${kx}px;top:${lineY + 32}px;transform:translateX(-50%);
+    font-size:13px;font-weight:700;color:var(--red);z-index:7;white-space:nowrap;
+    text-shadow:0 0 8px rgba(248,113,113,0.4)`;
+  kLabel.textContent = 'K=' + K;
+  dotsContainer.appendChild(kLabel);
+
+  // Farmer at N
+  const farmer = document.createElement('div');
+  farmer.className = 'farmer';
+  farmer.id = 'farmer';
+  farmer.innerHTML = farmerSVG();
+  farmer.style.left = nx + 'px';
+  farmer.style.top = (lineY - 60) + 'px';
+  farmerContainer.appendChild(farmer);
+
+  // Cow at K
+  const cow = document.createElement('div');
+  cow.className = 'cow-target';
+  cow.id = 'cowTarget';
+  cow.innerHTML = cowSVG();
+  cow.style.left = kx + 'px';
+  cow.style.top = (lineY - 48) + 'px';
+  cowContainer.appendChild(cow);
+
+  // Start dot
+  addExploredDot(N, 'start', true);
+
+  document.getElementById('queuePanel').classList.remove('show');
+}
+
+function addExploredDot(pos, cls, animate) {
+  const lineY = getLineYPx();
+  const x = posToX(pos);
+  const dot = document.createElement('div');
+  dot.className = 'explored-dot ' + cls;
+  dot.id = 'edot-' + pos;
+  dot.dataset.step = currentStep;
+  dot.style.left = x + 'px';
+  dot.style.top = lineY + 'px';
+  if (animate) dot.classList.add('pop');
+  else dot.style.opacity = '1';
+  dotsContainer.appendChild(dot);
+
+  // Step label above dot
+  const stepDist = distMap[pos] != null ? distMap[pos] : 0;
+  const label = document.createElement('div');
+  label.className = 'step-label ' + cls;
+  label.id = 'slabel-' + pos;
+  label.dataset.step = currentStep;
+  label.style.left = x + 'px';
+  label.style.top = (lineY - 78) + 'px';
+  label.textContent = stepDist + '步';
+  if (animate) label.classList.add('pop');
+  else label.style.opacity = '1';
+  dotsContainer.appendChild(label);
+}
+
+/* ===== Fade Old Elements ===== */
+const TAG_LIFETIME = 5;   // position tags fade after this many steps
+const DOT_MID_AGE = 4;    // dots become "mid" after this many steps
+const DOT_OLD_AGE = 8;    // dots become "old" after this many steps
+const ARROW_MID_AGE = 4;
+const ARROW_OLD_AGE = 8;
+
+function fadeOldElements() {
+  const now = currentStep;
+
+  // Fade dots
+  dotsContainer.querySelectorAll('.explored-dot').forEach(dot => {
+    const age = now - parseInt(dot.dataset.step || 0);
+    dot.classList.remove('old', 'mid');
+    if (age >= DOT_OLD_AGE) dot.classList.add('old');
+    else if (age >= DOT_MID_AGE) dot.classList.add('mid');
+  });
+
+  // Fade position tags
+  dotsContainer.querySelectorAll('.pos-tag').forEach(tag => {
+    const age = now - parseInt(tag.dataset.step || 0);
+    if (age >= TAG_LIFETIME) tag.classList.add('fading');
+    else tag.classList.remove('fading');
+  });
+
+  // Fade step labels (slower than dots - they're key info)
+  dotsContainer.querySelectorAll('.step-label').forEach(label => {
+    const age = now - parseInt(label.dataset.step || 0);
+    label.classList.remove('old', 'mid');
+    if (age >= DOT_OLD_AGE + 4) label.classList.add('old');
+    else if (age >= DOT_OLD_AGE) label.classList.add('mid');
+  });
+
+  // Fade arrows
+  arrowSvg.querySelectorAll('g').forEach(g => {
+    const age = now - parseInt(g.dataset.step || 0);
+    g.classList.remove('arrow-old', 'arrow-mid');
+    if (age >= ARROW_OLD_AGE) g.classList.add('arrow-old');
+    else if (age >= ARROW_MID_AGE) g.classList.add('arrow-mid');
+  });
+}
+
+/* ===== Reposition all elements after viewport change ===== */
+function repositionAll() {
+  const lineY = getLineYPx();
+
+  // Update N and K labels
+  const nLabel = document.getElementById('nLabel');
+  const kLabel = document.getElementById('kLabel');
+  if (nLabel) nLabel.style.left = posToX(N) + 'px';
+  if (kLabel) kLabel.style.left = posToX(K) + 'px';
+
+  // Update farmer
+  const farmer = document.getElementById('farmer');
+  if (farmer) {
+    // Keep farmer at last known position
+    const farmerPos = parseInt(farmer.dataset.pos || N);
+    farmer.style.left = posToX(farmerPos) + 'px';
+  }
+
+  // Update cow
+  const cow = document.getElementById('cowTarget');
+  if (cow) cow.style.left = posToX(K) + 'px';
+
+  // Update all dots
+  dotsContainer.querySelectorAll('.explored-dot').forEach(dot => {
+    const pos = parseInt(dot.id.replace('edot-', ''));
+    if (!isNaN(pos)) dot.style.left = posToX(pos) + 'px';
+  });
+
+  // Update all step labels
+  dotsContainer.querySelectorAll('.step-label').forEach(label => {
+    const pos = parseInt(label.id.replace('slabel-', ''));
+    if (!isNaN(pos)) label.style.left = posToX(pos) + 'px';
+  });
+
+  // Update all position tags
+  dotsContainer.querySelectorAll('.pos-tag').forEach(tag => {
+    const pos = parseInt(tag.textContent);
+    if (!isNaN(pos)) tag.style.left = posToX(pos) + 'px';
+  });
+
+  // Update dequeue tags
+  scene.querySelectorAll('.dequeue-tag').forEach(tag => {
+    const pos = parseInt(tag.dataset.pos);
+    if (!isNaN(pos)) tag.style.left = posToX(pos) + 'px';
+  });
+
+  renderTicks();
+}
+
+/* ===== Queue Panel ===== */
+function renderQueuePanel(step, animType) {
+  const panel = document.getElementById('queuePanel');
+  const row = document.getElementById('queueRow');
+  const processing = document.getElementById('queueProcessing');
+  const queueSize = document.getElementById('queueSize');
+
+  panel.classList.add('show');
+
+  const arr = step.queueArr || [];
+  queueSize.textContent = '(' + arr.length + ')';
+
+  if (step.processingPos != null) {
+    processing.innerHTML = '正在处理 <b>' + step.processingPos + '</b>';
+  } else {
+    processing.textContent = '';
+  }
+
+  row.innerHTML = '';
+
+  if (arr.length === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'queue-empty';
+    empty.textContent = '队列为空';
+    row.appendChild(empty);
+    return;
+  }
+
+  let currentLayer = -1;
+  arr.forEach((pos, i) => {
+    const layer = distMap[pos] != null ? distMap[pos] : 0;
+
+    if (layer !== currentLayer && i > 0) {
+      const sep = document.createElement('div');
+      sep.className = 'queue-layer-sep';
+      sep.setAttribute('data-layer', 'L' + layer);
+      row.appendChild(sep);
+    }
+    currentLayer = layer;
+
+    const badge = document.createElement('div');
+    const cls = discoveryMap[pos] || 'start';
+    badge.className = 'queue-badge ' + cls;
+    if (i === 0) badge.classList.add('front');
+    if (animType === 'enqueue' && step.newEnqueued === pos) badge.classList.add('badge-in');
+    const posDist = distMap[pos] != null ? distMap[pos] : 0;
+    badge.innerHTML = `<span style="font-size:9px;opacity:0.5;position:absolute;top:2px;right:4px">${posDist}</span>${pos}`;
+    row.appendChild(badge);
+  });
+}
+
+function wait(ms) { return new Promise(r => setTimeout(r, ms / speed)); }
+
+function svgEl(tag, attrs) {
+  const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+  for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v);
+  return el;
+}
+
+/* ===== Animate Step ===== */
+async function playStepForward(stepIdx) {
+  if (isAnimating) return;
+  isAnimating = true;
+
+  const step = bfsSteps[stepIdx];
+  const lineY = getLineYPx();
+  const farmer = document.getElementById('farmer');
+
+  if (step.type === 'init') {
+    document.getElementById('infoStep').textContent = '0';
+    document.getElementById('infoExplored').textContent = '1';
+    document.getElementById('levelDisplay').textContent = '第 0 层 · 起点 N=' + N;
+    document.getElementById('levelDisplay').classList.add('show');
+    renderQueuePanel(step);
+    updateStepBadge();
+  }
+  else if (step.type === 'dequeue') {
+    // Update viewport to follow current action
+    updateViewport([step.pos]);
+    repositionAll();
+
+    const cx = posToX(step.pos);
+    farmer.style.left = cx + 'px';
+    farmer.dataset.pos = step.pos;
+    farmer.classList.add('walking');
+    setTimeout(() => farmer.classList.remove('walking'), 300);
+
+    document.getElementById('infoStep').textContent = step.dist;
+    document.getElementById('infoExplored').textContent = step.explored.size;
+    document.getElementById('levelDisplay').textContent = `第 ${step.dist} 层 · 出队: ${step.pos} (${step.dist}步)`;
+    document.getElementById('levelDisplay').classList.add('show');
+
+    // Pulse ring
+    const dot = document.getElementById('edot-' + step.pos);
+    if (dot) {
+      const ring = document.createElement('div');
+      ring.className = 'processing-ring';
+      ring.style.left = dot.style.left;
+      ring.style.top = dot.style.top;
+      scene.appendChild(ring);
+      requestAnimationFrame(() => ring.classList.add('ring'));
+      setTimeout(() => ring.remove(), 700);
+    }
+
+    // Dequeue tag
+    const tag = document.createElement('div');
+    tag.className = 'dequeue-tag';
+    tag.dataset.pos = step.pos;
+    tag.style.left = cx + 'px';
+    tag.style.top = (lineY - 88) + 'px';
+    tag.textContent = '出队 ' + step.pos;
+    scene.appendChild(tag);
+    requestAnimationFrame(() => tag.classList.add('show'));
+    setTimeout(() => {
+      tag.classList.remove('show');
+      tag.classList.add('fade');
+      setTimeout(() => tag.remove(), 400);
+    }, 600);
+
+    renderQueuePanel(step, 'dequeue');
+    fadeOldElements();
+
+    await wait(300);
+    updateStepBadge();
+  }
+  else if (step.type === 'explore') {
+    // Update viewport to include new position
+    updateViewport([step.currentPos, step.nextPos]);
+    repositionAll();
+
+    const cx = posToX(step.currentPos);
+    farmer.style.left = cx + 'px';
+    farmer.dataset.pos = step.currentPos;
+    farmer.classList.add('walking');
+    setTimeout(() => farmer.classList.remove('walking'), 300);
+
+    document.getElementById('infoStep').textContent = step.dist;
+    document.getElementById('infoExplored').textContent = step.explored.size;
+
+    await wait(180);
+
+    const fromX = posToX(step.fromPos);
+    const nextX = posToX(step.nextPos);
+    const arrowColor = step.opCls === 'plus1' ? '#4ade80' : step.opCls === 'minus1' ? '#fbbf24' : '#22d3ee';
+
+    // Curved arrow
+    const g = svgEl('g', { opacity: '0.8' });
+    g.dataset.step = stepIdx;
+    const midX = (fromX + nextX) / 2;
+    const curveOffset = -35 - (step.dist % 3) * 15;
+    const pathD = `M${fromX},${lineY} Q${midX},${lineY + curveOffset} ${nextX},${lineY}`;
+    g.appendChild(svgEl('path', {
+      d: pathD, fill: 'none', stroke: arrowColor, 'stroke-width': '2',
+      'stroke-dasharray': step.opCls === 'times2' ? '6,4' : 'none',
+      'stroke-linecap': 'round'
+    }));
+
+    const angle = Math.atan2(lineY - (lineY + curveOffset), nextX - midX);
+    const ax2 = nextX - 8 * Math.cos(angle - 0.35);
+    const ay2 = lineY - 8 * Math.sin(angle - 0.35);
+    const bx2 = nextX - 8 * Math.cos(angle + 0.35);
+    const by2 = lineY - 8 * Math.sin(angle + 0.35);
+    g.appendChild(svgEl('polygon', {
+      points: `${nextX},${lineY} ${ax2},${ay2} ${bx2},${by2}`,
+      fill: arrowColor
+    }));
+
+    const textEl = svgEl('text', {
+      x: midX, y: lineY + curveOffset - 8,
+      'text-anchor': 'middle', fill: arrowColor, 'font-size': '13', 'font-weight': '700'
+    });
+    textEl.textContent = step.op;
+    g.appendChild(textEl);
+    arrowSvg.appendChild(g);
+
+    // Teleport flash
+    if (step.opCls === 'times2') {
+      const flash = document.createElement('div');
+      flash.className = 'teleport-flash';
+      flash.style.left = nextX + 'px';
+      flash.style.top = lineY + 'px';
+      scene.appendChild(flash);
+      requestAnimationFrame(() => flash.classList.add('go'));
+      setTimeout(() => flash.remove(), 800);
+    }
+
+    // Explored dot
+    addExploredDot(step.nextPos, step.opCls, true);
+
+    // Enqueue flash
+    const enqFlash = document.createElement('div');
+    enqFlash.className = 'enqueue-flash';
+    enqFlash.style.left = nextX + 'px';
+    enqFlash.style.top = lineY + 'px';
+    scene.appendChild(enqFlash);
+    requestAnimationFrame(() => enqFlash.classList.add('go'));
+    setTimeout(() => enqFlash.remove(), 600);
+
+    // Position tag
+    const tag = document.createElement('div');
+    tag.className = 'pos-tag';
+    tag.dataset.step = stepIdx;
+    tag.style.left = nextX + 'px';
+    tag.style.top = (lineY + 48 + (step.dist % 2) * 16) + 'px';
+    tag.style.color = arrowColor;
+    tag.style.background = step.opCls === 'plus1' ? 'rgba(74,222,128,0.1)' :
+                           step.opCls === 'minus1' ? 'rgba(251,191,36,0.1)' : 'rgba(34,211,238,0.1)';
+    tag.textContent = step.nextPos;
+    dotsContainer.appendChild(tag);
+
+    document.getElementById('levelDisplay').textContent = `第 ${step.dist} 层 · ${step.op} → ${step.nextPos} 入队`;
+    document.getElementById('levelDisplay').classList.add('show');
+
+    renderQueuePanel(step, 'enqueue');
+    fadeOldElements();
+
+    if (step.foundCow) {
+      document.getElementById('cowTarget').classList.add('caught');
+    }
+
+    updateStepBadge();
+  }
+  else if (step.type === 'found') {
+    const path = step.path;
+
+    // Update viewport to show full path
+    updateViewport(path);
+    repositionAll();
+
+    for (let i = 0; i < path.length; i++) {
+      const px = posToX(path[i]);
+      const node = document.createElement('div');
+      node.className = 'path-node';
+      node.style.cssText = `left:${px}px;top:${lineY}px;width:22px;height:22px;
+        background:var(--green);box-shadow:0 0 18px var(--green-glow)`;
+      pathContainer.appendChild(node);
+      await wait(120);
+      node.classList.add('show');
+      farmer.style.left = px + 'px';
+      farmer.dataset.pos = path[i];
+    }
+
+    document.getElementById('resultNum').textContent = step.dist;
+    document.getElementById('resultPath').textContent = path.join(' → ');
+    document.getElementById('resultDisplay').classList.add('show');
+    renderQueuePanel(step);
+    updateStepBadge();
+  }
+
+  isAnimating = false;
+}
+
+function updateStepBadge() {
+  const badge = document.getElementById('stepBadge');
+  if (currentStep < 0) badge.textContent = '';
+  else badge.textContent = '步骤 ' + (currentStep + 1) + ' / ' + bfsSteps.length;
+}
+
+function clearDynamic() {
+  dotsContainer.querySelectorAll('.explored-dot:not(.start)').forEach(e => e.remove());
+  dotsContainer.querySelectorAll('.pos-tag').forEach(e => e.remove());
+  dotsContainer.querySelectorAll('.step-label').forEach(e => e.remove());
+  arrowSvg.innerHTML = '';
+  pathContainer.innerHTML = '';
+  scene.querySelectorAll('.teleport-flash,.enqueue-flash,.processing-ring,.dequeue-tag').forEach(e => e.remove());
+  const farmer = document.getElementById('farmer');
+  if (farmer) { farmer.style.left = posToX(N) + 'px'; farmer.dataset.pos = N; }
+  const cow = document.getElementById('cowTarget');
+  if (cow) { cow.style.filter = ''; cow.classList.remove('caught'); }
+  document.getElementById('queuePanel').classList.remove('show');
+  document.getElementById('queueRow').innerHTML = '';
+}
+
+function renderStepState(stepIdx) {
+  clearDynamic();
+  initViewport();
+
+  // First pass: collect all positions to determine viewport
+  const allPositions = [N, K];
+  for (let i = 0; i <= stepIdx; i++) {
+    const step = bfsSteps[i];
+    if (step.type === 'explore') allPositions.push(step.nextPos);
+    if (step.type === 'dequeue') allPositions.push(step.pos);
+  }
+  updateViewport(allPositions);
+
+  const lineY = getLineYPx();
+  let processingPos = null;
+  let farmerPos = N;
+
+  for (let i = 0; i <= stepIdx; i++) {
+    const step = bfsSteps[i];
+    if (step.type === 'init') {
+      document.getElementById('infoStep').textContent = '0';
+      document.getElementById('infoExplored').textContent = '1';
+      // Step label for start position
+      const sx = posToX(N);
+      const slabel = document.createElement('div');
+      slabel.className = 'step-label start';
+      slabel.id = 'slabel-' + N;
+      slabel.dataset.step = i;
+      slabel.style.left = sx + 'px';
+      slabel.style.top = (lineY - 78) + 'px';
+      slabel.style.opacity = '1';
+      slabel.textContent = '0步';
+      dotsContainer.appendChild(slabel);
+    }
+    else if (step.type === 'dequeue') {
+      processingPos = step.pos;
+      farmerPos = step.pos;
+      document.getElementById('infoStep').textContent = step.dist;
+      document.getElementById('infoExplored').textContent = step.explored.size;
+    }
+    else if (step.type === 'explore') {
+      processingPos = step.processingPos;
+      farmerPos = step.currentPos;
+
+      const fromX = posToX(step.fromPos);
+      const nextX = posToX(step.nextPos);
+      const arrowColor = step.opCls === 'plus1' ? '#4ade80' : step.opCls === 'minus1' ? '#fbbf24' : '#22d3ee';
+      const age = stepIdx - i;
+
+      // Dot
+      const dot = document.createElement('div');
+      dot.className = 'explored-dot ' + step.opCls;
+      dot.id = 'edot-' + step.nextPos;
+      dot.dataset.step = i;
+      dot.style.left = nextX + 'px';
+      dot.style.top = lineY + 'px';
+      dot.style.opacity = '1';
+      if (age >= DOT_OLD_AGE) dot.classList.add('old');
+      else if (age >= DOT_MID_AGE) dot.classList.add('mid');
+      dotsContainer.appendChild(dot);
+
+      // Step label
+      const slabel = document.createElement('div');
+      slabel.className = 'step-label ' + step.opCls;
+      slabel.id = 'slabel-' + step.nextPos;
+      slabel.dataset.step = i;
+      slabel.style.left = nextX + 'px';
+      slabel.style.top = (lineY - 78) + 'px';
+      slabel.style.opacity = '1';
+      slabel.textContent = step.dist + '步';
+      if (age >= DOT_OLD_AGE + 4) slabel.classList.add('old');
+      else if (age >= DOT_OLD_AGE) slabel.classList.add('mid');
+      dotsContainer.appendChild(slabel);
+
+      // Arrow
+      const g = svgEl('g', { opacity: age >= ARROW_OLD_AGE ? '0.12' : age >= ARROW_MID_AGE ? '0.35' : '0.5' });
+      g.dataset.step = i;
+      if (age >= ARROW_OLD_AGE) g.classList.add('arrow-old');
+      else if (age >= ARROW_MID_AGE) g.classList.add('arrow-mid');
+      const midX = (fromX + nextX) / 2;
+      const curveOffset = -35 - (step.dist % 3) * 15;
+      const pathD = `M${fromX},${lineY} Q${midX},${lineY + curveOffset} ${nextX},${lineY}`;
+      g.appendChild(svgEl('path', {
+        d: pathD, fill: 'none', stroke: arrowColor, 'stroke-width': '2',
+        'stroke-dasharray': step.opCls === 'times2' ? '6,4' : 'none',
+        'stroke-linecap': 'round'
+      }));
+      const textEl = svgEl('text', {
+        x: midX, y: lineY + curveOffset - 8,
+        'text-anchor': 'middle', fill: arrowColor, 'font-size': '13', 'font-weight': '700'
+      });
+      textEl.textContent = step.op;
+      g.appendChild(textEl);
+      arrowSvg.appendChild(g);
+
+      // Tag (only show recent ones)
+      if (age < TAG_LIFETIME) {
+        const tag = document.createElement('div');
+        tag.className = 'pos-tag';
+        tag.dataset.step = i;
+        tag.style.left = nextX + 'px';
+        tag.style.top = (lineY + 48 + (step.dist % 2) * 16) + 'px';
+        tag.style.color = arrowColor;
+        tag.style.background = step.opCls === 'plus1' ? 'rgba(74,222,128,0.1)' :
+                               step.opCls === 'minus1' ? 'rgba(251,191,36,0.1)' : 'rgba(34,211,238,0.1)';
+        tag.textContent = step.nextPos;
+        if (age >= TAG_LIFETIME - 1) tag.classList.add('fading');
+        dotsContainer.appendChild(tag);
+      }
+
+      document.getElementById('infoStep').textContent = step.dist;
+      document.getElementById('infoExplored').textContent = step.explored.size;
+    }
+    else if (step.type === 'found') {
+      document.getElementById('resultNum').textContent = step.dist;
+      document.getElementById('resultPath').textContent = step.path.join(' → ');
+      document.getElementById('resultDisplay').classList.add('show');
+      for (const p of step.path) {
+        const px = posToX(p);
+        const node = document.createElement('div');
+        node.className = 'path-node show';
+        node.style.cssText = `left:${px}px;top:${lineY}px;width:22px;height:22px;
+          background:var(--green);box-shadow:0 0 18px var(--green-glow)`;
+        pathContainer.appendChild(node);
+      }
+      farmerPos = K;
+    }
+  }
+
+  const farmer = document.getElementById('farmer');
+  if (farmer) { farmer.style.left = posToX(farmerPos) + 'px'; farmer.dataset.pos = farmerPos; }
+
+  renderTicks();
+  renderQueuePanel(bfsSteps[stepIdx]);
+  updateStepBadge();
+}
+
+/* ===== Controls ===== */
+async function nextStep() {
+  if (isAnimating || currentStep >= bfsSteps.length - 1) return;
+  document.getElementById('introPrompt').classList.add('hide');
+  currentStep++;
+  await playStepForward(currentStep);
+  updateButtons();
+}
+
+function prevStep() {
+  if (isAnimating || currentStep <= 0) return;
+  currentStep--;
+  document.getElementById('resultDisplay').classList.remove('show');
+  renderStepState(currentStep);
+  updateButtons();
+}
+
+function resetAll() {
+  if (isAnimating) return;
+  stopAuto();
+  currentStep = -1;
+  document.getElementById('resultDisplay').classList.remove('show');
+  document.getElementById('introPrompt').classList.remove('hide');
+  document.getElementById('levelDisplay').classList.remove('show');
+  computeBFS();
+  renderScene();
+  updateStepBadge();
+  updateButtons();
+  document.getElementById('infoN').textContent = N;
+  document.getElementById('infoK').textContent = K;
+}
+
+async function toggleAuto() {
+  if (isAutoPlaying) { stopAuto(); return; }
+  isAutoPlaying = true;
+  document.getElementById('btnAuto').classList.add('active');
+  document.getElementById('btnAuto').textContent = '⏸ 暂停';
+  document.getElementById('introPrompt').classList.add('hide');
+  while (isAutoPlaying && currentStep < bfsSteps.length - 1) {
+    currentStep++;
+    await playStepForward(currentStep);
+    updateButtons();
+    if (isAutoPlaying && currentStep < bfsSteps.length - 1) await waitRaw(300);
+  }
+  stopAuto();
+}
+
+function stopAuto() {
+  isAutoPlaying = false;
+  document.getElementById('btnAuto').classList.remove('active');
+  document.getElementById('btnAuto').textContent = '⏵ 自动';
+}
+
+function waitRaw(ms) { return new Promise(r => setTimeout(r, ms)); }
+function updateSpeed(val) { speed = parseFloat(val); document.getElementById('speedVal').textContent = speed.toFixed(1) + 'x'; }
+function updateButtons() {
+  document.getElementById('btnPrev').disabled = currentStep <= 0 || isAnimating;
+  document.getElementById('btnNext').disabled = currentStep >= bfsSteps.length - 1 || isAnimating;
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextStep(); }
+  else if (e.key === 'ArrowLeft') { e.preventDefault(); prevStep(); }
+  else if (e.key === 'r' || e.key === 'R') { resetAll(); }
+  else if (e.key === 'p' || e.key === 'P') { toggleAuto(); }
+});
+
+let resizeTimer;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => {
+    renderScene();
+    if (currentStep >= 0) renderStepState(currentStep);
+  }, 150);
+});
+
+function init() {
+  createStars();
+  computeBFS();
+  renderScene();
+  updateButtons();
+  document.getElementById('infoN').textContent = N;
+  document.getElementById('infoK').textContent = K;
+  document.getElementById('sampleBtn1').classList.add('active');
+}
+init();
+</script>
+</body>
+</html>

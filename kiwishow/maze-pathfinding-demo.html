@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>B3625 迷宫寻路 - 交互演示</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#1a1a26;--border:rgba(255,255,255,0.1);
+  --text:#f1f5f9;--muted:#94a3b8;
+  --card-bg:rgba(10,10,20,0.6);--card-blur:20px;
+  --control-bg:rgba(0,0,0,0.35);
+  --orange:#f97316;--orange-glow:rgba(249,115,22,0.4);
+  --green:#4ade80;--green-glow:rgba(74,222,128,0.3);
+  --red:#f87171;--red-glow:rgba(248,113,113,0.4);
+  --cyan:#22d3ee;--cyan-glow:rgba(34,211,238,0.3);
+  --yellow:#fbbf24;--yellow-glow:rgba(251,191,36,0.3);
+  --purple:#a78bfa;--purple-glow:rgba(167,139,250,0.3);
+  --wall-color:#3a3548;--wall-border:#4a4558;
+  --floor-color:rgba(255,255,255,0.04);--floor-border:rgba(255,255,255,0.06);
+  --visited-color:rgba(34,211,238,0.12);--visited-border:rgba(34,211,238,0.25);
+  --frontier-color:rgba(251,191,36,0.15);--frontier-border:rgba(251,191,36,0.35);
+  --path-color:rgba(74,222,128,0.25);--path-border:rgba(74,222,128,0.5);
+  --queue-bg:rgba(10,10,20,0.8);
+  --step-label-color:var(--text);
+  --grid-line:rgba(255,255,255,0.05);
+  --arrow-color:rgba(34,211,238,0.5);
+  --cat-shadow:0 0 12px var(--orange-glow);
+}
+[data-theme="light"]{
+  --bg:#f5f1ed;--border:rgba(200,190,180,0.3);
+  --text:#2c2825;--muted:#3d3830;
+  --card-bg:rgba(255,255,255,0.2);--card-blur:30px;
+  --control-bg:rgba(255,255,255,0.35);
+  --wall-color:#8a8598;--wall-border:#9a9588;
+  --floor-color:rgba(255,255,255,0.5);--floor-border:rgba(200,190,180,0.25);
+  --visited-color:rgba(34,211,238,0.1);--visited-border:rgba(34,211,238,0.3);
+  --frontier-color:rgba(251,191,36,0.12);--frontier-border:rgba(251,191,36,0.35);
+  --path-color:rgba(74,222,128,0.2);--path-border:rgba(74,222,128,0.45);
+  --queue-bg:rgba(255,255,255,0.5);
+  --step-label-color:var(--text);
+  --grid-line:rgba(0,0,0,0.06);
+  --arrow-color:rgba(34,211,238,0.7);
+  --cat-shadow:0 0 12px rgba(249,115,22,0.3);
+}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;height:100vh;overflow:hidden;display:flex;flex-direction:column;transition:background 0.4s,color 0.4s}
+
+.scene{flex:1;position:relative;overflow:hidden;user-select:none;transition:background 0.4s}
+.scene::before{content:'';position:absolute;inset:0;
+  background-image:linear-gradient(var(--grid-line) 1px,transparent 1px),linear-gradient(90deg,var(--grid-line) 1px,transparent 1px);
+  background-size:40px 40px;pointer-events:none;z-index:0}
+.scene::after{content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 50% 40% at 50% 50%,rgba(34,211,238,0.03),transparent 70%),
+             radial-gradient(ellipse 40% 30% at 25% 45%,rgba(249,115,22,0.03),transparent);
+  pointer-events:none;z-index:0}
+[data-theme="light"] .scene::after{
+  background:radial-gradient(ellipse 35% 30% at 20% 30%,rgba(196,181,253,0.3),transparent),
+             radial-gradient(ellipse 30% 25% at 75% 25%,rgba(253,186,170,0.28),transparent),
+             radial-gradient(ellipse 40% 35% at 50% 60%,rgba(147,197,253,0.22),transparent),
+             radial-gradient(ellipse 30% 25% at 30% 70%,rgba(253,230,186,0.2),transparent),
+             radial-gradient(ellipse 25% 20% at 80% 65%,rgba(252,205,220,0.18),transparent)}
+
+/* Maze Grid */
+.maze-container{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:5}
+.maze-grid{display:grid;gap:2px;position:relative}
+.cell{width:var(--cell-size);height:var(--cell-size);border-radius:4px;position:relative;transition:background 0.3s,border-color 0.3s,box-shadow 0.3s}
+.cell.wall{background:var(--wall-color);border:1px solid var(--wall-border);box-shadow:inset 0 2px 4px rgba(0,0,0,0.3)}
+[data-theme="light"] .cell.wall{background:var(--wall-color);box-shadow:inset 0 1px 3px rgba(0,0,0,0.1)}
+.cell.floor{background:var(--floor-color);border:1px solid var(--floor-border)}
+.cell.visited{background:var(--visited-color);border-color:var(--visited-border)}
+.cell.frontier{background:var(--frontier-color);border-color:var(--frontier-border);animation:frontierPulse 1.2s ease-in-out infinite alternate}
+@keyframes frontierPulse{0%{box-shadow:inset 0 0 4px rgba(251,191,36,0.1)}100%{box-shadow:inset 0 0 10px rgba(251,191,36,0.2)}}
+.cell.path-cell{background:var(--path-color);border-color:var(--path-border);animation:pathGlow 0.8s ease-in-out infinite alternate}
+@keyframes pathGlow{0%{box-shadow:inset 0 0 6px var(--green-glow)}100%{box-shadow:inset 0 0 14px var(--green-glow)}}
+.cell.start-cell{background:rgba(249,115,22,0.2);border-color:rgba(249,115,22,0.5)}
+.cell.end-cell{background:rgba(248,113,113,0.2);border-color:rgba(248,113,113,0.5)}
+
+/* Step number on cell */
+.cell-step{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:13px;font-weight:900;color:var(--step-label-color);opacity:0.55;pointer-events:none;z-index:6}
+
+/* Cat character */
+.cat{position:absolute;z-index:10;transform:translate(-50%,-50%);transition:left 0.25s ease-out,top 0.25s ease-out;pointer-events:none;filter:drop-shadow(var(--cat-shadow))}
+.cat.moving{animation:catBounce 0.25s ease-in-out}
+@keyframes catBounce{0%,100%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(-50%,-50%) scale(1.15)}}
+
+/* Arrow overlay */
+.arrow-layer{position:absolute;inset:0;pointer-events:none;z-index:4}
+.arrow-layer svg{width:100%;height:100%}
+
+/* Info Panel */
+.info-panel{position:absolute;top:10px;left:10px;z-index:15;opacity:0.92;
+  background:var(--card-bg);backdrop-filter:blur(var(--card-blur));border:1px solid var(--border);border-radius:10px;padding:8px 12px;
+  transition:background 0.4s,border-color 0.4s}
+[data-theme="light"] .info-panel{box-shadow:inset 0 1px 0 rgba(255,255,255,0.5)}
+.info-panel .title{font-size:14px;color:var(--text);font-weight:700;margin-bottom:4px;letter-spacing:0.5px}
+.info-panel .row{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--muted);margin:1px 0}
+.info-panel .val{font-weight:700;min-width:28px;text-align:right}
+.info-panel .val.orange{color:var(--orange)}
+.info-panel .val.green{color:var(--green)}
+.info-panel .val.cyan{color:var(--cyan)}
+.info-panel .val.red{color:var(--red)}
+
+/* Legend + Theme toggle */
+.legend{position:absolute;top:110px;left:10px;z-index:15;opacity:0.85;
+  background:var(--card-bg);backdrop-filter:blur(var(--card-blur));border:1px solid var(--border);border-radius:10px;padding:8px 12px;
+  transition:background 0.4s,border-color 0.4s}
+[data-theme="light"] .legend{box-shadow:inset 0 1px 0 rgba(255,255,255,0.5)}
+.legend .item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);margin:2px 0}
+.legend .swatch{width:14px;height:14px;border-radius:3px;border:1px solid var(--border)}
+.theme-btn{margin-top:6px;width:100%;background:rgba(255,255,255,0.06);border:1px solid var(--border);
+  color:var(--muted);padding:4px 8px;border-radius:6px;cursor:pointer;font-size:12px;transition:all 0.2s}
+.theme-btn:hover{background:rgba(255,255,255,0.12);color:var(--text)}
+
+/* Queue Panel */
+.queue-panel{position:absolute;bottom:56px;left:10px;right:10px;z-index:15;
+  background:var(--queue-bg);backdrop-filter:blur(var(--card-blur));border:1px solid var(--border);border-radius:10px;
+  padding:6px 12px 8px;opacity:0;transition:opacity 0.4s,background 0.4s,border-color 0.4s;max-height:100px;overflow:hidden}
+[data-theme="light"] .queue-panel{box-shadow:inset 0 1px 0 rgba(255,255,255,0.5)}
+.queue-panel.show{opacity:1}
+.queue-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+.queue-title{font-size:12px;color:var(--muted);font-weight:600;letter-spacing:0.5px}
+.queue-size{font-weight:400;opacity:0.5;font-size:11px}
+.queue-processing{font-size:12px;color:var(--orange);font-weight:600}
+.queue-processing b{font-size:14px;font-weight:900}
+.queue-row{display:flex;align-items:center;gap:4px;flex-wrap:wrap;min-height:32px}
+.queue-badge{min-width:34px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:800;flex-shrink:0;border:2px solid transparent;transition:all 0.2s;position:relative}
+.queue-badge.front{border-color:var(--orange);box-shadow:0 0 8px var(--orange-glow);animation:frontGlow 1.2s ease-in-out infinite alternate}
+@keyframes frontGlow{0%{box-shadow:0 0 4px var(--orange-glow)}100%{box-shadow:0 0 12px var(--orange-glow)}}
+.queue-badge.front::before{content:'队首';position:absolute;top:-13px;left:50%;transform:translateX(-50%);
+  font-size:8px;color:var(--orange);white-space:nowrap;opacity:0.7;font-weight:600}
+.queue-badge.qv{background:rgba(34,211,238,0.12);color:var(--cyan);border-color:rgba(34,211,238,0.2)}
+.queue-badge.badge-in{animation:badgePop 0.4s cubic-bezier(.3,1.5,.6,1)}
+@keyframes badgePop{0%{transform:scale(0);opacity:0}60%{transform:scale(1.2)}100%{transform:scale(1);opacity:1}}
+.queue-layer-sep{width:1px;height:24px;background:var(--border);margin:0 2px;flex-shrink:0;position:relative}
+.queue-layer-sep::after{content:attr(data-layer);position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  font-size:8px;color:var(--muted);opacity:0.4;white-space:nowrap;background:var(--bg);padding:1px 3px;border-radius:3px}
+.queue-empty{font-size:11px;color:var(--muted);opacity:0.4;padding:6px 0;font-style:italic}
+
+/* Reasoning Panel */
+.reasoning-panel{position:absolute;top:10px;right:10px;z-index:16;
+  background:var(--card-bg);backdrop-filter:blur(var(--card-blur));border:1px solid var(--border);border-radius:10px;
+  padding:10px 14px;opacity:0;transition:opacity 0.4s,background 0.4s,border-color 0.4s;min-width:220px;pointer-events:none}
+[data-theme="light"] .reasoning-panel{box-shadow:inset 0 1px 0 rgba(255,255,255,0.5)}
+.reasoning-panel.show{opacity:1}
+.reasoning-title{font-size:14px;color:var(--orange);font-weight:700;margin-bottom:6px;letter-spacing:0.5px}
+.reasoning-from{font-size:13px;color:var(--text);margin-bottom:6px;opacity:0.85;font-weight:500}
+.reasoning-dir{display:flex;align-items:center;gap:8px;font-size:13px;padding:5px 8px;margin:3px 0;border-radius:6px;transition:background 0.25s,outline-color 0.25s}
+.reasoning-dir .arrow{font-weight:900;min-width:18px;text-align:center;font-size:15px}
+.reasoning-dir .target{color:var(--muted);min-width:52px;font-size:12px;font-family:monospace}
+.reasoning-dir .result{font-weight:700;flex:1;font-size:13px}
+.reasoning-dir .dist-tag{font-size:12px;color:var(--cyan);font-weight:700;margin-left:2px}
+.reasoning-dir.result-oob .result{color:var(--muted);opacity:0.4}
+.reasoning-dir.result-oob .arrow{opacity:0.3}
+.reasoning-dir.result-wall .result{color:var(--red);opacity:0.8}
+.reasoning-dir.result-wall .arrow{color:var(--red);opacity:0.7}
+.reasoning-dir.result-visited .result{color:var(--yellow);opacity:0.8}
+.reasoning-dir.result-visited .arrow{color:var(--yellow);opacity:0.7}
+.reasoning-dir.result-ok .result{color:var(--green)}
+.reasoning-dir.result-ok .arrow{color:var(--green)}
+.reasoning-dir.result-ok{background:rgba(74,222,128,0.08)}
+.reasoning-dir.active{background:rgba(249,115,22,0.12);outline:1.5px solid rgba(249,115,22,0.4)}
+.reasoning-dir.active .arrow{color:var(--orange)}
+
+/* Direction check flash on grid */
+.cell.check-wall{animation:flashWall 0.5s ease-out}
+@keyframes flashWall{0%{box-shadow:inset 0 0 12px var(--red-glow),0 0 6px var(--red-glow)}100%{box-shadow:none}}
+.cell.check-visited{animation:flashVisited 0.5s ease-out}
+@keyframes flashVisited{0%{box-shadow:inset 0 0 10px var(--yellow-glow),0 0 5px var(--yellow-glow)}100%{box-shadow:none}}
+.cell.check-oob-edge{position:relative}
+.cell.check-oob-edge::after{content:'✗';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:14px;font-weight:900;color:var(--red);opacity:0;animation:flashOobEdge 0.6s ease-out forwards;pointer-events:none;z-index:8}
+@keyframes flashOobEdge{0%{opacity:0.8;transform:translate(-50%,-50%) scale(1.3)}100%{opacity:0;transform:translate(-50%,-50%) scale(0.8)}}
+
+/* Step badge */
+.step-badge{position:absolute;top:14px;left:50%;transform:translateX(-50%);z-index:15;font-size:12px;color:var(--muted);opacity:0.65;
+  background:var(--card-bg);backdrop-filter:blur(var(--card-blur));border:1px solid var(--border);border-radius:8px;padding:5px 12px;
+  transition:background 0.4s,border-color 0.4s}
+
+/* Result */
+.result-display{position:absolute;top:40%;left:50%;transform:translate(-50%,-50%);
+  text-align:center;z-index:25;opacity:0;transition:opacity 0.5s;pointer-events:none}
+.result-display.show{opacity:1}
+.result-yes{font-size:72px;font-weight:900;color:var(--green);line-height:1;
+  text-shadow:0 0 40px var(--green-glow),0 0 80px rgba(74,222,128,0.15)}
+.result-no{font-size:72px;font-weight:900;color:var(--red);line-height:1;
+  text-shadow:0 0 40px var(--red-glow),0 0 80px rgba(248,113,113,0.15)}
+.result-sub{font-size:18px;color:var(--muted);margin-top:8px}
+.result-path{font-size:15px;color:var(--cyan);margin-top:10px;font-weight:700;
+  text-shadow:0 0 16px var(--cyan-glow);letter-spacing:1px}
+
+/* Intro */
+.intro-prompt{position:absolute;top:35%;left:50%;transform:translate(-50%,-50%);
+  text-align:center;z-index:18;pointer-events:none;transition:opacity 0.4s}
+.intro-prompt.hide{opacity:0}
+.intro-prompt .big{font-size:32px;font-weight:700;color:var(--text);margin-bottom:8px}
+.intro-prompt .small{font-size:16px;color:var(--muted)}
+
+/* Controls */
+.controls{height:42px;background:var(--control-bg);border-top:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;gap:8px;padding:0 14px;flex-shrink:0;
+  transition:background 0.4s,border-color 0.4s}
+.controls button{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);
+  color:var(--muted);padding:4px 11px;border-radius:5px;cursor:pointer;font-size:12px;
+  transition:all 0.15s;outline:none}
+.controls button:hover{background:rgba(255,255,255,0.08);color:var(--text);border-color:rgba(255,255,255,0.16)}
+.controls button:active{transform:scale(0.96)}
+.controls button.active{background:rgba(249,115,22,0.12);border-color:var(--orange);color:var(--orange)}
+.controls button:disabled{opacity:0.3;cursor:default;transform:none}
+.sample-group{display:flex;gap:4px;opacity:0.55}
+.sample-group button{font-size:11px;padding:3px 8px}
+.sample-group button:hover{opacity:1}
+.sep{width:1px;height:18px;background:var(--border);margin:0 3px}
+.speed-group{display:flex;align-items:center;gap:4px;opacity:0.5;font-size:11px;color:var(--muted)}
+.speed-group input{width:55px;accent-color:var(--orange);height:3px}
+</style>
+</head>
+<body>
+
+<div class="scene" id="scene">
+  <div class="maze-container" id="mazeContainer">
+    <div class="maze-grid" id="mazeGrid"></div>
+    <div class="cat" id="cat"></div>
+    <div class="arrow-layer" id="arrowLayer"><svg id="arrowSvg"></svg></div>
+  </div>
+
+  <div class="info-panel" id="infoPanel">
+    <div class="title">BFS 迷宫寻路</div>
+    <div class="row">起点: <span class="val orange" id="infoStart">(1,1)</span></div>
+    <div class="row">终点: <span class="val red" id="infoEnd">(3,5)</span></div>
+    <div class="row">当前步数: <span class="val green" id="infoStep">0</span></div>
+    <div class="row">已探索: <span class="val cyan" id="infoExplored">0</span></div>
+  </div>
+
+  <div class="reasoning-panel" id="reasoningPanel">
+    <div class="reasoning-title">🔍 推理过程</div>
+    <div class="reasoning-from" id="reasoningFrom"></div>
+    <div id="reasoningDirs"></div>
+  </div>
+
+  <div class="legend" id="legendPanel">
+    <div class="item"><div class="swatch" style="background:var(--wall-color);border-color:var(--wall-border)"></div> 墙壁</div>
+    <div class="item"><div class="swatch" style="background:var(--visited-color);border-color:var(--visited-border)"></div> 已访问</div>
+    <div class="item"><div class="swatch" style="background:var(--frontier-color);border-color:var(--frontier-border)"></div> 待探索</div>
+    <div class="item"><div class="swatch" style="background:var(--path-color);border-color:var(--path-border)"></div> 最短路径</div>
+    <button class="theme-btn" id="themeBtn" onclick="toggleTheme()">🌙 浅色模式</button>
+  </div>
+
+  <div class="step-badge" id="stepBadge"></div>
+
+  <div class="queue-panel" id="queuePanel">
+    <div class="queue-header">
+      <span class="queue-title">BFS 队列 <span class="queue-size" id="queueSize">(1)</span></span>
+      <span class="queue-processing" id="queueProcessing"></span>
+    </div>
+    <div class="queue-row" id="queueRow"></div>
+  </div>
+
+  <div class="result-display" id="resultDisplay">
+    <div id="resultText"></div>
+    <div class="result-sub" id="resultSub"></div>
+    <div class="result-path" id="resultPath"></div>
+  </div>
+
+  <div class="intro-prompt" id="introPrompt">
+    <div class="big">🐱 迷宫寻路</div>
+    <div class="small">点击 ▶ 开始 BFS 搜索演示</div>
+  </div>
+</div>
+
+<div class="controls">
+  <div class="sample-group">
+    <button onclick="loadSample(1)" id="sampleBtn1">样例1</button>
+    <button onclick="loadSample(2)" id="sampleBtn2">样例2</button>
+    <button onclick="loadSample(3)" id="sampleBtn3">样例3</button>
+  </div>
+  <div class="sep"></div>
+  <button onclick="prevStep()" id="btnPrev" disabled>◀</button>
+  <button onclick="nextStep()" id="btnNext">▶</button>
+  <button onclick="resetAll()" id="btnReset">↺</button>
+  <button onclick="toggleAuto()" id="btnAuto">⏵ 自动</button>
+  <div class="sep"></div>
+  <div class="speed-group">
+    速度
+    <input type="range" min="0.3" max="3" step="0.1" value="1" id="speedSlider" oninput="updateSpeed(this.value)">
+    <span id="speedVal">1.0x</span>
+  </div>
+</div>
+
+<script>
+/* ===== State ===== */
+let maze = [];
+let rows = 3, cols = 5;
+let bfsSteps = [];
+let currentStep = -1;
+let isAnimating = false;
+let isAutoPlaying = false;
+let speed = 1;
+let distMap = {};
+let cellEls = {};
+
+const scene = document.getElementById('scene');
+const mazeGrid = document.getElementById('mazeGrid');
+const mazeContainer = document.getElementById('mazeContainer');
+const arrowSvg = document.getElementById('arrowSvg');
+const cat = document.getElementById('cat');
+
+const sampleData = {
+  1: { rows:3, cols:5, maze:['.##.#','.#...','...#.'] },
+  2: { rows:5, cols:5, maze:['.....','#.#.#','.....','#.#.#','.....'] },
+  3: { rows:4, cols:6, maze:['.#....','.#.##.','.#....','...#..'] }
+};
+
+function loadSample(idx) {
+  if (isAnimating || isAutoPlaying) return;
+  const s = sampleData[idx];
+  rows = s.rows; cols = s.cols;
+  maze = s.maze.map(r => r.split(''));
+  document.querySelectorAll('.sample-group button').forEach((b,i) => b.classList.toggle('active', i+1===idx));
+  resetAll();
+}
+
+/* ===== Theme ===== */
+function toggleTheme() {
+  const html = document.documentElement;
+  const isLight = html.getAttribute('data-theme') === 'light';
+  html.setAttribute('data-theme', isLight ? 'dark' : 'light');
+  document.getElementById('themeBtn').textContent = isLight ? '🌙 浅色模式' : '☀️ 暗色模式';
+}
+
+/* ===== Cell size calc ===== */
+function calcCellSize() {
+  const sRect = scene.getBoundingClientRect();
+  const maxW = sRect.width * 0.85;
+  const maxH = sRect.height * 0.78;
+  const cw = Math.floor(maxW / cols);
+  const ch = Math.floor(maxH / rows);
+  return Math.min(cw, ch, 100);
+}
+
+/* ===== Render Maze ===== */
+function renderMaze() {
+  mazeGrid.innerHTML = '';
+  cellEls = {};
+  const cellSize = calcCellSize();
+  document.documentElement.style.setProperty('--cell-size', cellSize + 'px');
+  mazeGrid.style.gridTemplateColumns = `repeat(${cols}, var(--cell-size))`;
+  mazeGrid.style.gridTemplateRows = `repeat(${rows}, var(--cell-size))`;
+
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      cell.dataset.r = r;
+      cell.dataset.c = c;
+      if (maze[r][c] === '#') {
+        cell.classList.add('wall');
+      } else {
+        cell.classList.add('floor');
+        if (r === 0 && c === 0) cell.classList.add('start-cell');
+        if (r === rows-1 && c === cols-1) cell.classList.add('end-cell');
+      }
+      mazeGrid.appendChild(cell);
+      cellEls[r+','+c] = cell;
+    }
+  }
+
+  // Cat at start
+  cat.innerHTML = catSVG();
+  cat.style.width = cellSize + 'px';
+  cat.style.height = cellSize + 'px';
+  positionCat(0, 0);
+
+  // Clear arrows
+  arrowSvg.innerHTML = '';
+
+  document.getElementById('infoStart').textContent = `(1,1)`;
+  document.getElementById('infoEnd').textContent = `(${rows},${cols})`;
+  document.getElementById('queuePanel').classList.remove('show');
+}
+
+function positionCat(r, c) {
+  const cellSize = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--cell-size'));
+  const x = c * (cellSize + 2) + cellSize / 2;
+  const y = r * (cellSize + 2) + cellSize / 2;
+  cat.style.left = x + 'px';
+  cat.style.top = y + 'px';
+  cat.dataset.r = r;
+  cat.dataset.c = c;
+}
+
+/* ===== Cat SVG ===== */
+function catSVG() {
+  return `<svg viewBox="0 0 40 40" width="100%" height="100%">
+    <ellipse cx="20" cy="28" rx="12" ry="10" fill="#4a90d9" stroke="#3570b0" stroke-width="1"/>
+    <circle cx="20" cy="16" r="10" fill="#4a90d9" stroke="#3570b0" stroke-width="1"/>
+    <circle cx="20" cy="17" r="8" fill="#f5f5f5" opacity="0.15"/>
+    <polygon points="12,10 14,4 17,10" fill="#4a90d9" stroke="#3570b0" stroke-width="0.8"/>
+    <polygon points="28,10 26,4 23,10" fill="#4a90d9" stroke="#3570b0" stroke-width="0.8"/>
+    <polygon points="12.5,9 14,5.5 16,9" fill="#f5c6d0"/>
+    <polygon points="27.5,9 26,5.5 24,9" fill="#f5c6d0"/>
+    <ellipse cx="15" cy="15" rx="3" ry="3.2" fill="white"/>
+    <ellipse cx="25" cy="15" rx="3" ry="3.2" fill="white"/>
+    <circle cx="16" cy="15" r="2" fill="#1a1a2e"/>
+    <circle cx="26" cy="15" r="2" fill="#1a1a2e"/>
+    <circle cx="16.6" cy="14.3" r="0.7" fill="white"/>
+    <circle cx="26.6" cy="14.3" r="0.7" fill="white"/>
+    <ellipse cx="20" cy="20" rx="2.5" ry="1.5" fill="#f5c6d0"/>
+    <path d="M17,21 Q20,24 23,21" fill="none" stroke="#3570b0" stroke-width="1" stroke-linecap="round"/>
+    <line x1="8" y1="18" x2="4" y2="17" stroke="#3570b0" stroke-width="0.7"/>
+    <line x1="8" y1="20" x2="4" y2="20" stroke="#3570b0" stroke-width="0.7"/>
+    <line x1="32" y1="18" x2="36" y2="17" stroke="#3570b0" stroke-width="0.7"/>
+    <line x1="32" y1="20" x2="36" y2="20" stroke="#3570b0" stroke-width="0.7"/>
+    <ellipse cx="20" cy="36" rx="10" ry="2.5" fill="rgba(0,0,0,0.12)"/>
+    <rect x="12" y="36" width="4" height="3" rx="2" fill="#e8e8e8"/>
+    <rect x="24" y="36" width="4" height="3" rx="2" fill="#e8e8e8"/>
+    <circle cx="15" cy="15.8" r="5" fill="var(--orange)" opacity="0.15"/>
+    <circle cx="25" cy="15.8" r="5" fill="var(--orange)" opacity="0.15"/>
+  </svg>`;
+}
+
+/* ===== BFS Computation ===== */
+function computeBFS() {
+  bfsSteps = [];
+  distMap = {};
+  const visited = {};
+  const parent = {};
+  const queue = [{r:0, c:0}];
+  visited['0,0'] = true;
+  distMap['0,0'] = 0;
+  parent['0,0'] = null;
+
+  const dx = [-1, 1, 0, 0];
+  const dy = [0, 0, -1, 1];
+  const dirNames = ['↑', '↓', '←', '→'];
+
+  bfsSteps.push({
+    type: 'init',
+    pos: {r:0, c:0},
+    dist: 0,
+    visited: new Set(['0,0']),
+    queueArr: [{r:0,c:0}],
+    processingPos: null,
+    newEnqueued: null,
+    exploredCount: 1
+  });
+
+  let head = 0;
+  while (head < queue.length) {
+    const cur = queue[head++];
+    const d = distMap[cur.r+','+cur.c];
+    const queueAfterDequeue = queue.slice(head);
+
+    // Compute reasoning for 4 directions
+    const reasoning = [];
+    for (let di = 0; di < 4; di++) {
+      const nr = cur.r + dx[di];
+      const nc = cur.c + dy[di];
+      const key = nr+','+nc;
+      let result;
+      if (nr < 0 || nr >= rows || nc < 0 || nc >= cols) result = 'oob';
+      else if (maze[nr][nc] === '#') result = 'wall';
+      else if (visited[key]) result = 'visited';
+      else result = 'ok';
+      reasoning.push({ dir: dirNames[di], r: nr, c: nc, result, dist: result === 'ok' ? d + 1 : null });
+    }
+
+    bfsSteps.push({
+      type: 'dequeue',
+      pos: cur,
+      dist: d,
+      visited: new Set(Object.keys(visited)),
+      queueArr: queueAfterDequeue,
+      processingPos: cur,
+      newEnqueued: null,
+      exploredCount: Object.keys(visited).length,
+      reasoning
+    });
+
+    for (let i = 0; i < 4; i++) {
+      const nr = cur.r + dx[i];
+      const nc = cur.c + dy[i];
+      const key = nr+','+nc;
+      if (nr >= 0 && nr < rows && nc >= 0 && nc < cols && maze[nr][nc] !== '#' && !visited[key]) {
+        visited[key] = true;
+        distMap[key] = d + 1;
+        parent[key] = cur.r+','+cur.c;
+        queue.push({r:nr, c:nc});
+
+        const queueAfterEnqueue = queue.slice(head);
+        const found = (nr === rows-1 && nc === cols-1);
+
+        bfsSteps.push({
+          type: 'explore',
+          pos: cur,
+          nextPos: {r:nr, c:nc},
+          dir: dirNames[i],
+          dist: d + 1,
+          visited: new Set(Object.keys(visited)),
+          queueArr: queueAfterEnqueue,
+          processingPos: cur,
+          newEnqueued: {r:nr, c:nc},
+          exploredCount: Object.keys(visited).length,
+          foundCow: found
+        });
+
+        if (found) {
+          // Reconstruct path
+          const path = [];
+          let pk = key;
+          while (pk !== null) {
+            const [pr, pc] = pk.split(',').map(Number);
+            path.unshift({r:pr, c:pc});
+            pk = parent[pk];
+          }
+          bfsSteps.push({
+            type: 'found',
+            dist: d + 1,
+            path,
+            visited: new Set(Object.keys(visited)),
+            queueArr: queueAfterEnqueue,
+            processingPos: cur,
+            exploredCount: Object.keys(visited).length
+          });
+          return;
+        }
+      }
+    }
+  }
+
+  // No path
+  bfsSteps.push({
+    type: 'notfound',
+    visited: new Set(Object.keys(visited)),
+    exploredCount: Object.keys(visited).length
+  });
+}
+
+/* ===== Queue Panel ===== */
+function renderQueuePanel(step, animType) {
+  const panel = document.getElementById('queuePanel');
+  const row = document.getElementById('queueRow');
+  const processing = document.getElementById('queueProcessing');
+  const queueSize = document.getElementById('queueSize');
+
+  panel.classList.add('show');
+  const arr = step.queueArr || [];
+  queueSize.textContent = '(' + arr.length + ')';
+
+  if (step.processingPos) {
+    processing.innerHTML = '处理 <b>(' + (step.processingPos.r+1) + ',' + (step.processingPos.c+1) + ')</b>';
+  } else {
+    processing.textContent = '';
+  }
+
+  row.innerHTML = '';
+  if (arr.length === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'queue-empty';
+    empty.textContent = '队列为空';
+    row.appendChild(empty);
+    return;
+  }
+
+  let currentLayer = -1;
+  arr.forEach((pos, i) => {
+    const d = distMap[pos.r+','+pos.c] != null ? distMap[pos.r+','+pos.c] : 0;
+    if (d !== currentLayer && i > 0) {
+      const sep = document.createElement('div');
+      sep.className = 'queue-layer-sep';
+      sep.setAttribute('data-layer', 'L' + d);
+      row.appendChild(sep);
+    }
+    currentLayer = d;
+
+    const badge = document.createElement('div');
+    badge.className = 'queue-badge qv';
+    if (i === 0) badge.classList.add('front');
+    if (animType === 'enqueue' && step.newEnqueued && pos.r === step.newEnqueued.r && pos.c === step.newEnqueued.c) {
+      badge.classList.add('badge-in');
+    }
+    badge.innerHTML = `<span style="font-size:8px;opacity:0.5;position:absolute;top:1px;right:3px">${d}</span>${pos.r+1},${pos.c+1}`;
+    row.appendChild(badge);
+  });
+}
+
+/* ===== Reasoning Panel ===== */
+function findLastDequeueStep(upToIdx) {
+  for (let i = upToIdx; i >= 0; i--) {
+    if (bfsSteps[i].type === 'dequeue') return bfsSteps[i];
+  }
+  return null;
+}
+
+function renderReasoningPanel(step, activeDir) {
+  const panel = document.getElementById('reasoningPanel');
+  const from = document.getElementById('reasoningFrom');
+  const dirs = document.getElementById('reasoningDirs');
+
+  if (!step || !step.reasoning) {
+    panel.classList.remove('show');
+    return;
+  }
+
+  panel.classList.add('show');
+  from.textContent = `从 (${step.pos.r+1},${step.pos.c+1}) 向四个方向探索:`;
+
+  dirs.innerHTML = '';
+  step.reasoning.forEach(r => {
+    const div = document.createElement('div');
+    div.className = `reasoning-dir result-${r.result}`;
+    if (activeDir && r.dir === activeDir) div.classList.add('active');
+
+    const targetStr = (r.result === 'oob') ? '——' : `(${r.r+1},${r.c+1})`;
+    let resultText, distTag = '';
+    switch(r.result) {
+      case 'oob': resultText = '越界 ✗'; break;
+      case 'wall': resultText = '遇墙 ✗'; break;
+      case 'visited': resultText = '已访问 ✗'; break;
+      case 'ok': resultText = '可通行 ✓'; distTag = `<span class="dist-tag">${r.dist}步</span>`; break;
+    }
+
+    div.innerHTML = `<span class="arrow">${r.dir}</span><span class="target">${targetStr}</span><span class="result">${resultText}</span>${distTag}`;
+    dirs.appendChild(div);
+  });
+}
+
+/* ===== Flash direction checks on grid ===== */
+async function flashDirectionChecks(reasoning) {
+  for (const r of reasoning) {
+    if (r.result === 'oob') {
+      // Flash the edge cell nearest to the OOB direction
+      // Find the boundary cell in that direction
+      let edgeR = r.r, edgeC = r.c;
+      // The target (r.r, r.c) is out of bounds; flash the closest in-bounds cell
+      if (edgeR < 0) edgeR = 0;
+      else if (edgeR >= rows) edgeR = rows - 1;
+      if (edgeC < 0) edgeC = 0;
+      else if (edgeC >= cols) edgeC = cols - 1;
+      const edgeCell = cellEls[edgeR+','+edgeC];
+      if (edgeCell) {
+        edgeCell.classList.add('check-oob-edge');
+        setTimeout(() => edgeCell.classList.remove('check-oob-edge'), 600);
+      }
+    } else if (r.result === 'wall') {
+      const wallCell = cellEls[r.r+','+r.c];
+      if (wallCell) {
+        wallCell.classList.remove('check-wall');
+        void wallCell.offsetWidth; // force reflow
+        wallCell.classList.add('check-wall');
+        setTimeout(() => wallCell.classList.remove('check-wall'), 500);
+      }
+    } else if (r.result === 'visited') {
+      const visCell = cellEls[r.r+','+r.c];
+      if (visCell) {
+        visCell.classList.remove('check-visited');
+        void visCell.offsetWidth;
+        visCell.classList.add('check-visited');
+        setTimeout(() => visCell.classList.remove('check-visited'), 500);
+      }
+    }
+    // 'ok' results are handled by the explore step animation
+    await wait(120);
+  }
+}
+
+/* ===== Animate Step ===== */
+function wait(ms) { return new Promise(r => setTimeout(r, ms / speed)); }
+
+async function playStepForward(stepIdx) {
+  if (isAnimating) return;
+  isAnimating = true;
+  const step = bfsSteps[stepIdx];
+
+  if (step.type === 'init') {
+    document.getElementById('infoStep').textContent = '0';
+    document.getElementById('infoExplored').textContent = '1';
+    renderQueuePanel(step);
+    renderReasoningPanel(null);
+  }
+  else if (step.type === 'dequeue') {
+    const {r, c} = step.pos;
+    positionCat(r, c);
+    cat.classList.add('moving');
+    setTimeout(() => cat.classList.remove('moving'), 260);
+
+    document.getElementById('infoStep').textContent = step.dist;
+    document.getElementById('infoExplored').textContent = step.exploredCount;
+
+    // Mark as visited
+    const cell = cellEls[r+','+c];
+    if (cell) {
+      cell.classList.remove('floor','frontier');
+      cell.classList.add('visited');
+      // Add step number
+      const sLabel = document.createElement('div');
+      sLabel.className = 'cell-step';
+      sLabel.textContent = step.dist;
+      cell.appendChild(sLabel);
+    }
+
+    renderQueuePanel(step, 'dequeue');
+    renderReasoningPanel(step);
+    // Flash direction checks on grid
+    await flashDirectionChecks(step.reasoning);
+    await wait(150);
+  }
+  else if (step.type === 'explore') {
+    const {r: nr, c: nc} = step.nextPos;
+    document.getElementById('infoStep').textContent = step.dist;
+    document.getElementById('infoExplored').textContent = step.exploredCount;
+
+    const cell = cellEls[nr+','+nc];
+    if (cell) {
+      cell.classList.remove('floor');
+      cell.classList.add('frontier');
+      const sLabel = document.createElement('div');
+      sLabel.className = 'cell-step';
+      sLabel.textContent = step.dist;
+      cell.appendChild(sLabel);
+    }
+
+    // Move cat to processing position
+    if (step.processingPos) {
+      positionCat(step.processingPos.r, step.processingPos.c);
+    }
+
+    // Draw arrow
+    const cellSize = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--cell-size'));
+    const gap = 2;
+    const fromR = step.pos.r, fromC = step.pos.c;
+    const x1 = fromC * (cellSize + gap) + cellSize / 2;
+    const y1 = fromR * (cellSize + gap) + cellSize / 2;
+    const x2 = nc * (cellSize + gap) + cellSize / 2;
+    const y2 = nr * (cellSize + gap) + cellSize / 2;
+
+    const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+    line.setAttribute('x1', x1); line.setAttribute('y1', y1);
+    line.setAttribute('x2', x2); line.setAttribute('y2', y2);
+    line.setAttribute('stroke', 'var(--cyan)');
+    line.setAttribute('stroke-width', '2');
+    line.setAttribute('stroke-opacity', '0.4');
+    line.setAttribute('stroke-linecap', 'round');
+    line.dataset.step = stepIdx;
+    arrowSvg.appendChild(line);
+
+    renderQueuePanel(step, 'enqueue');
+    // Highlight the direction being explored in reasoning panel
+    const lastDQ = findLastDequeueStep(stepIdx);
+    if (lastDQ) renderReasoningPanel(lastDQ, step.dir);
+
+    if (step.foundCow) {
+      const endCell = cellEls[(rows-1)+','+(cols-1)];
+      if (endCell) {
+        endCell.classList.remove('floor','frontier');
+        endCell.classList.add('visited');
+      }
+    }
+
+    await wait(200);
+  }
+  else if (step.type === 'found') {
+    // Highlight path
+    for (let i = 0; i < step.path.length; i++) {
+      const p = step.path[i];
+      const cell = cellEls[p.r+','+p.c];
+      if (cell) {
+        cell.classList.remove('floor','visited','frontier');
+        cell.classList.add('path-cell');
+        const sLabel = cell.querySelector('.cell-step');
+        if (sLabel) sLabel.style.color = 'var(--green)';
+      }
+      await wait(80);
+      positionCat(p.r, p.c);
+    }
+
+    document.getElementById('resultText').className = 'result-yes';
+    document.getElementById('resultText').textContent = 'Yes';
+    document.getElementById('resultSub').textContent = '最短路径长度: ' + step.dist;
+    document.getElementById('resultPath').textContent = step.path.map(p => `(${p.r+1},${p.c+1})`).join(' → ');
+    document.getElementById('resultDisplay').classList.add('show');
+    renderQueuePanel(step);
+    renderReasoningPanel(null);
+  }
+  else if (step.type === 'notfound') {
+    document.getElementById('resultText').className = 'result-no';
+    document.getElementById('resultText').textContent = 'No';
+    document.getElementById('resultSub').textContent = '无法到达终点';
+    document.getElementById('resultPath').textContent = '';
+    document.getElementById('resultDisplay').classList.add('show');
+    renderReasoningPanel(null);
+  }
+
+  isAnimating = false;
+  updateStepBadge();
+}
+
+function updateStepBadge() {
+  const badge = document.getElementById('stepBadge');
+  if (currentStep < 0) badge.textContent = '';
+  else badge.textContent = '步骤 ' + (currentStep + 1) + ' / ' + bfsSteps.length;
+}
+
+/* ===== Rebuild state for prev ===== */
+function rebuildToStep(stepIdx) {
+  // Reset all cells
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const cell = cellEls[r+','+c];
+      if (!cell) continue;
+      cell.className = 'cell';
+      if (maze[r][c] === '#') { cell.classList.add('wall'); continue; }
+      cell.classList.add('floor');
+      if (r === 0 && c === 0) cell.classList.add('start-cell');
+      if (r === rows-1 && c === cols-1) cell.classList.add('end-cell');
+      // Remove step labels
+      const sl = cell.querySelector('.cell-step');
+      if (sl) sl.remove();
+    }
+  }
+  arrowSvg.innerHTML = '';
+  document.getElementById('resultDisplay').classList.remove('show');
+
+  let lastCatPos = {r:0,c:0};
+  let foundPath = null;
+
+  for (let i = 0; i <= stepIdx; i++) {
+    const step = bfsSteps[i];
+    if (step.type === 'init') {
+      document.getElementById('infoStep').textContent = '0';
+      document.getElementById('infoExplored').textContent = '1';
+    }
+    else if (step.type === 'dequeue') {
+      const {r, c} = step.pos;
+      const cell = cellEls[r+','+c];
+      if (cell) {
+        cell.classList.remove('floor','frontier');
+        cell.classList.add('visited');
+        if (!cell.querySelector('.cell-step')) {
+          const sl = document.createElement('div');
+          sl.className = 'cell-step';
+          sl.textContent = step.dist;
+          cell.appendChild(sl);
+        }
+      }
+      lastCatPos = {r, c};
+      document.getElementById('infoStep').textContent = step.dist;
+      document.getElementById('infoExplored').textContent = step.exploredCount;
+    }
+    else if (step.type === 'explore') {
+      const {r: nr, c: nc} = step.nextPos;
+      const cell = cellEls[nr+','+nc];
+      if (cell) {
+        cell.classList.remove('floor');
+        cell.classList.add('frontier');
+        if (!cell.querySelector('.cell-step')) {
+          const sl = document.createElement('div');
+          sl.className = 'cell-step';
+          sl.textContent = step.dist;
+          cell.appendChild(sl);
+        }
+      }
+
+      // Draw arrow
+      const cellSize = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--cell-size'));
+      const gap = 2;
+      const fromR = step.pos.r, fromC = step.pos.c;
+      const x1 = fromC * (cellSize + gap) + cellSize / 2;
+      const y1 = fromR * (cellSize + gap) + cellSize / 2;
+      const x2 = nc * (cellSize + gap) + cellSize / 2;
+      const y2 = nr * (cellSize + gap) + cellSize / 2;
+      const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+      line.setAttribute('x1', x1); line.setAttribute('y1', y1);
+      line.setAttribute('x2', x2); line.setAttribute('y2', y2);
+      line.setAttribute('stroke', 'var(--cyan)');
+      line.setAttribute('stroke-width', '2');
+      line.setAttribute('stroke-opacity', '0.4');
+      line.setAttribute('stroke-linecap', 'round');
+      arrowSvg.appendChild(line);
+
+      lastCatPos = step.processingPos || step.pos;
+      document.getElementById('infoStep').textContent = step.dist;
+      document.getElementById('infoExplored').textContent = step.exploredCount;
+    }
+    else if (step.type === 'found') {
+      foundPath = step.path;
+      document.getElementById('infoStep').textContent = step.dist;
+    }
+  }
+
+  // Highlight path if found step was included
+  if (foundPath) {
+    for (const p of foundPath) {
+      const cell = cellEls[p.r+','+p.c];
+      if (cell) {
+        cell.classList.remove('floor','visited','frontier');
+        cell.classList.add('path-cell');
+      }
+    }
+  }
+
+  positionCat(lastCatPos.r, lastCatPos.c);
+  if (stepIdx >= 0) {
+    renderQueuePanel(bfsSteps[stepIdx]);
+    // Show reasoning panel for current step
+    const curStep = bfsSteps[stepIdx];
+    if (curStep.type === 'dequeue' && curStep.reasoning) {
+      renderReasoningPanel(curStep);
+    } else if (curStep.type === 'explore') {
+      const lastDQ = findLastDequeueStep(stepIdx);
+      if (lastDQ) renderReasoningPanel(lastDQ, curStep.dir);
+      else renderReasoningPanel(null);
+    } else {
+      renderReasoningPanel(null);
+    }
+  }
+  else {
+    document.getElementById('queuePanel').classList.remove('show');
+    renderReasoningPanel(null);
+  }
+  updateStepBadge();
+}
+
+/* ===== Controls ===== */
+async function nextStep() {
+  if (isAnimating || currentStep >= bfsSteps.length - 1) return;
+  document.getElementById('introPrompt').classList.add('hide');
+  currentStep++;
+  await playStepForward(currentStep);
+  updateButtons();
+}
+
+function prevStep() {
+  if (isAnimating || currentStep <= 0) return;
+  currentStep--;
+  rebuildToStep(currentStep);
+  updateButtons();
+}
+
+function resetAll() {
+  if (isAnimating) return;
+  stopAuto();
+  currentStep = -1;
+  document.getElementById('resultDisplay').classList.remove('show');
+  document.getElementById('introPrompt').classList.remove('hide');
+  renderReasoningPanel(null);
+  computeBFS();
+  renderMaze();
+  updateStepBadge();
+  updateButtons();
+}
+
+async function toggleAuto() {
+  if (isAutoPlaying) { stopAuto(); return; }
+  isAutoPlaying = true;
+  document.getElementById('btnAuto').classList.add('active');
+  document.getElementById('btnAuto').textContent = '⏸ 暂停';
+  document.getElementById('introPrompt').classList.add('hide');
+  while (isAutoPlaying && currentStep < bfsSteps.length - 1) {
+    currentStep++;
+    await playStepForward(currentStep);
+    updateButtons();
+    if (isAutoPlaying && currentStep < bfsSteps.length - 1) await waitRaw(350);
+  }
+  stopAuto();
+}
+
+function stopAuto() {
+  isAutoPlaying = false;
+  document.getElementById('btnAuto').classList.remove('active');
+  document.getElementById('btnAuto').textContent = '⏵ 自动';
+}
+
+function waitRaw(ms) { return new Promise(r => setTimeout(r, ms)); }
+function updateSpeed(val) { speed = parseFloat(val); document.getElementById('speedVal').textContent = speed.toFixed(1) + 'x'; }
+function updateButtons() {
+  document.getElementById('btnPrev').disabled = currentStep <= 0 || isAnimating;
+  document.getElementById('btnNext').disabled = currentStep >= bfsSteps.length - 1 || isAnimating;
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextStep(); }
+  else if (e.key === 'ArrowLeft') { e.preventDefault(); prevStep(); }
+  else if (e.key === 'r' || e.key === 'R') resetAll();
+  else if (e.key === 'p' || e.key === 'P') toggleAuto();
+});
+
+let resizeTimer;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => {
+    renderMaze();
+    if (currentStep >= 0) rebuildToStep(currentStep);
+  }, 200);
+});
+
+function init() {
+  maze = sampleData[1].maze.map(r => r.split(''));
+  rows = sampleData[1].rows;
+  cols = sampleData[1].cols;
+  computeBFS();
+  renderMaze();
+  updateButtons();
+  document.getElementById('sampleBtn1').classList.add('active');
+}
+init();
+</script>
+</body>
+</html>
