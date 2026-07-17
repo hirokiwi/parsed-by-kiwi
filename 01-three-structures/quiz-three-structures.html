@@ -8,31 +8,31 @@
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&family=Fira+Code:wght@400;500;700&display=swap');
 
   :root {
-    --bg-deep: #242433;
-    --glass-bg: rgba(36, 38, 54, 0.45);
-    --glass-border: rgba(255, 255, 255, 0.1);
-    --glass-hover: rgba(42, 44, 62, 0.6);
+    --bg-deep: #fdf6ee;
+    --glass-bg: rgba(255, 255, 255, 0.55);
+    --glass-border: rgba(255, 255, 255, 0.45);
+    --glass-hover: rgba(255, 255, 255, 0.7);
     --accent: #f97316;
-    --accent-light: #fb923c;
-    --accent-glow: rgba(249, 115, 22, 0.2);
-    --green: #4ade80;
-    --green-bg: rgba(74, 222, 128, 0.14);
-    --red: #f87171;
-    --red-bg: rgba(248, 113, 113, 0.12);
-    --blue: #60a5fa;
-    --blue-bg: rgba(96, 165, 250, 0.14);
-    --text-primary: #f1f5f9;
-    --text-body: #e2e8f0;
-    --text-muted: #94a3b8;
-    --code-bg: rgba(28, 30, 44, 0.8);
+    --accent-light: #ea580c;
+    --accent-glow: rgba(249, 115, 22, 0.12);
+    --green: #16a34a;
+    --green-bg: rgba(74, 222, 128, 0.18);
+    --red: #dc2626;
+    --red-bg: rgba(248, 113, 113, 0.15);
+    --blue: #2563eb;
+    --blue-bg: rgba(96, 165, 250, 0.15);
+    --text-primary: #2c2825;
+    --text-body: #3d3830;
+    --text-muted: #8b7355;
+    --code-bg: rgba(30, 30, 46, 0.88);
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html { scroll-behavior: smooth; }
 
   body {
-    font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
-    background: var(--bg-deep); color: var(--text-primary);
+    font-family: 'PingFang SC', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: linear-gradient(135deg, #fdf6ee 0%, #fcecd8 40%, #f9e0c6 100%); color: var(--text-primary);
     line-height: 1.75; min-height: 100vh;
     position: relative; overflow-x: hidden;
   }
@@ -40,22 +40,22 @@
   body::before {
     content: ''; position: fixed; inset: 0; z-index: 0;
     background:
-      radial-gradient(ellipse 80% 60% at 20% 10%, rgba(249,115,22,0.08) 0%, transparent 50%),
-      radial-gradient(ellipse 60% 80% at 80% 90%, rgba(96,165,250,0.06) 0%, transparent 50%),
-      radial-gradient(ellipse 50% 50% at 50% 50%, rgba(74,222,128,0.04) 0%, transparent 60%);
+      radial-gradient(ellipse 80% 60% at 20% 10%, rgba(249,115,22,0.1) 0%, transparent 50%),
+      radial-gradient(ellipse 60% 80% at 80% 90%, rgba(251,146,60,0.08) 0%, transparent 50%),
+      radial-gradient(ellipse 50% 50% at 50% 50%, rgba(253,186,116,0.06) 0%, transparent 60%);
     pointer-events: none;
   }
 
   body::after {
     content: ''; position: fixed; inset: 0; z-index: 0; opacity: 0.03;
     background-image:
-      linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
+      linear-gradient(rgba(249,115,22,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(249,115,22,0.04) 1px, transparent 1px);
     background-size: 60px 60px; pointer-events: none;
   }
 
   ::-webkit-scrollbar { width: 6px; }
-  ::-webkit-scrollbar-track { background: var(--bg-deep); }
+  ::-webkit-scrollbar-track { background: #fdf6ee; }
   ::-webkit-scrollbar-thumb { background: rgba(249,115,22,0.4); border-radius: 3px; }
 
   .container { position: relative; z-index: 1; width: 100%; max-width: 100%; margin: 0 auto; padding: 0 32px 80px; }
@@ -63,12 +63,12 @@
   .header { position: relative; z-index: 1; padding: 56px 40px 40px; text-align: center; margin-bottom: 8px; }
   .header-glass {
     position: absolute; inset: 0; z-index: -1;
-    background: rgba(18, 20, 32, 0.5); backdrop-filter: blur(24px) saturate(1.2);
+    background: rgba(255, 255, 255, 0.5); backdrop-filter: blur(24px) saturate(1.2);
     -webkit-backdrop-filter: blur(24px) saturate(1.2);
     border-bottom: 1px solid var(--glass-border);
   }
-  .header-tag { display: inline-block; padding: 5px 18px; background: rgba(249,115,22,0.12); border: 1px solid rgba(249,115,22,0.35); border-radius: 50px; font-size: 12px; color: var(--accent-light); letter-spacing: 2px; margin-bottom: 18px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
-  .header h1 { font-size: clamp(26px, 4vw, 38px); font-weight: 900; color: var(--text-primary); margin-bottom: 10px; text-shadow: 0 0 40px rgba(249,115,22,0.15); }
+  .header-tag { display: inline-block; padding: 5px 18px; background: rgba(249,115,22,0.1); border: 1px solid rgba(249,115,22,0.25); border-radius: 50px; font-size: 12px; color: var(--accent-light); letter-spacing: 2px; margin-bottom: 18px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+  .header h1 { font-size: clamp(26px, 4vw, 38px); font-weight: 900; color: var(--text-primary); margin-bottom: 10px; text-shadow: 0 2px 20px rgba(249,115,22,0.1); }
   .header p { color: var(--text-muted); font-size: 15px; }
 
   .section-title { padding: 36px 40px 14px; font-size: 18px; font-weight: 700; color: var(--accent-light); display: flex; align-items: center; gap: 10px; }
@@ -83,7 +83,7 @@
     display: grid; grid-template-columns: 1fr 1fr;
     transition: all 0.3s ease;
   }
-  .q-card-inner:hover { background: var(--glass-hover); border-color: rgba(249,115,22,0.15); box-shadow: 0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.04); }
+  .q-card-inner:hover { background: var(--glass-hover); border-color: rgba(249,115,22,0.15); box-shadow: 0 8px 32px rgba(249,115,22,0.1), inset 0 1px 0 rgba(255,255,255,0.6); }
 
   .q-left { padding: 36px 40px; border-right: 1px solid var(--glass-border); display: flex; flex-direction: column; justify-content: center; }
   .q-num { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; background: linear-gradient(135deg, var(--accent), #ea580c); border-radius: 10px; font-size: 14px; font-weight: 900; color: #fff; margin-bottom: 18px; flex-shrink: 0; box-shadow: 0 4px 12px rgba(249,115,22,0.3); }
@@ -92,32 +92,32 @@
   .q-text code { background: var(--code-bg); padding: 2px 8px; border-radius: 5px; font-family: 'Fira Code', Consolas, monospace; font-size: 13px; color: var(--accent-light); border: 1px solid rgba(249,115,22,0.15); }
 
   .q-options { display: flex; flex-direction: column; gap: 10px; }
-  .q-option { padding: 11px 18px; background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border); border-radius: 10px; font-size: 14px; color: var(--text-muted); cursor: default; transition: all 0.2s; display: flex; align-items: flex-start; gap: 12px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
-  .q-option:hover { border-color: rgba(255,255,255,0.12); background: rgba(255,255,255,0.05); }
-  .q-option .opt-letter { min-width: 24px; height: 24px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; background: rgba(255,255,255,0.06); color: var(--text-muted); }
+  .q-option { padding: 11px 18px; background: rgba(255,255,255,0.3); border: 1px solid var(--glass-border); border-radius: 10px; font-size: 14px; color: var(--text-body); cursor: default; transition: all 0.2s; display: flex; align-items: flex-start; gap: 12px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+  .q-option:hover { border-color: rgba(249,115,22,0.2); background: rgba(255,255,255,0.5); }
+  .q-option .opt-letter { min-width: 24px; height: 24px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; background: rgba(249,115,22,0.08); color: var(--accent-light); }
   .q-option.correct { border-color: rgba(74,222,128,0.4); background: var(--green-bg); }
-  .q-option.correct .opt-letter { background: var(--green); color: #0a0a0f; }
+  .q-option.correct .opt-letter { background: var(--green); color: #fff; }
   .q-option.correct .opt-text { color: var(--green); font-weight: 500; }
   .q-option.wrong { opacity: 0.55; }
 
   .judge-opts { display: flex; gap: 10px; }
-  .judge-opt { padding: 8px 22px; border-radius: 8px; font-size: 14px; background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border); transition: all 0.2s; }
-  .judge-opt.correct { border-color: rgba(74,222,128,0.4); background: var(--green-bg); color: var(--green); font-weight: 600; }
+  .judge-opt { padding: 8px 22px; border-radius: 8px; font-size: 14px; background: rgba(255,255,255,0.3); border: 1px solid var(--glass-border); transition: all 0.2s; }
+  .judge-opt.correct { border-color: rgba(22,163,74,0.4); background: var(--green-bg); color: var(--green); font-weight: 600; }
   .judge-opt.wrong { opacity: 0.4; }
 
-  .q-code { background: var(--code-bg); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 16px 20px; font-family: 'Fira Code', Consolas, 'Courier New', monospace; font-size: 13.5px; line-height: 1.9; color: #e2e8f0; margin-bottom: 18px; overflow-x: auto; white-space: pre; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+  .q-code { background: var(--code-bg); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 16px 20px; font-family: 'Fira Code', Consolas, 'Courier New', monospace; font-size: 13.5px; line-height: 1.9; color: #e8e0d8; margin-bottom: 18px; overflow-x: auto; white-space: pre; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
 
   .q-right { padding: 36px 40px; display: flex; flex-direction: column; justify-content: center; }
   .analysis-badge { display: inline-flex; align-items: center; gap: 6px; padding: 5px 14px; background: var(--accent-glow); border: 1px solid rgba(249,115,22,0.25); border-radius: 6px; font-size: 12px; color: var(--accent-light); font-weight: 700; margin-bottom: 18px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
   .analysis-body { font-size: 14px; color: var(--text-body); line-height: 2.1; }
   .analysis-body strong { color: var(--text-primary); }
   .analysis-body code { background: var(--code-bg); padding: 2px 8px; border-radius: 4px; font-family: 'Fira Code', Consolas, monospace; font-size: 13px; color: var(--accent-light); border: 1px solid rgba(249,115,22,0.12); }
-  .analysis-step { padding: 14px 18px; background: rgba(255,255,255,0.03); border-radius: 10px; border-left: 3px solid var(--accent); margin: 12px 0; font-size: 13.5px; line-height: 2.1; color: var(--text-body); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+  .analysis-step { padding: 14px 18px; background: rgba(255,255,255,0.3); border-radius: 10px; border-left: 3px solid var(--accent); margin: 12px 0; font-size: 13.5px; line-height: 2.1; color: var(--text-body); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
   .analysis-step strong { color: var(--text-primary); }
   .analysis-conclusion { margin-top: 18px; padding: 14px 20px; background: var(--green-bg); border: 1px solid rgba(74,222,128,0.25); border-radius: 10px; font-size: 14px; font-weight: 700; color: var(--green); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
-  .analysis-trap { margin-top: 14px; padding: 14px 20px; background: var(--red-bg); border: 1px solid rgba(248,113,113,0.2); border-radius: 10px; font-size: 13px; color: #fca5a5; line-height: 1.9; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+  .analysis-trap { margin-top: 14px; padding: 14px 20px; background: var(--red-bg); border: 1px solid rgba(248,113,113,0.2); border-radius: 10px; font-size: 13px; color: #b91c1c; line-height: 1.9; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
   .analysis-trap strong { color: var(--red); }
-  .analysis-note { margin-top: 14px; padding: 14px 20px; background: var(--blue-bg); border: 1px solid rgba(96,165,250,0.2); border-radius: 10px; font-size: 13px; color: #93c5fd; line-height: 1.9; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+  .analysis-note { margin-top: 14px; padding: 14px 20px; background: var(--blue-bg); border: 1px solid rgba(96,165,250,0.2); border-radius: 10px; font-size: 13px; color: #1d4ed8; line-height: 1.9; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
   .analysis-note strong { color: var(--blue); }
 
   @media(max-width: 900px) {
@@ -413,20 +413,20 @@ cout &lt;&lt; m;</div>
   <div class="q-num">11</div>
   <div class="q-text">如果 a 和 b 均为 int 类型的变量，下列表达式能正确判断"a等于0或b等于0"的是（ ）</div>
   <div class="q-options">
-    <div class="q-option correct"><span class="opt-letter">A</span><span class="opt-text"><code>(a == 0) || (b == 0)</code></span></div>
-    <div class="q-option wrong"><span class="opt-letter">B</span><span class="opt-text"><code>(a == 0) &amp;&amp; (b == 0)</code></span></div>
-    <div class="q-option wrong"><span class="opt-letter">C</span><span class="opt-text"><code>(!a) || (!b)</code></span></div>
-    <div class="q-option wrong"><span class="opt-letter">D</span><span class="opt-text"><code>(a == b == 0)</code></span></div>
+    <div class="q-option correct"><span class="opt-letter">A</span><span class="opt-text"><code>(!a) || (!b)</code></span></div>
+    <div class="q-option wrong"><span class="opt-letter">B</span><span class="opt-text"><code>(a == b == 0)</code></span></div>
+    <div class="q-option wrong"><span class="opt-letter">C</span><span class="opt-text"><code>(a == 0) &amp;&amp; (b == 0)</code></span></div>
+    <div class="q-option wrong"><span class="opt-letter">D</span><span class="opt-text"><code>(a == 0) - (b == 0) == 0</code></span></div>
   </div>
 </div>
 <div class="q-right">
   <div class="analysis-badge">✏️ 解析</div>
   <div class="analysis-body">
     逐一分析：
-    <div class="analysis-step">A. <code>(a==0)||(b==0)</code> → 用 || 表示"或"，语义明确 ✓<br>B. <code>(a==0)&amp;&amp;(b==0)</code> → &amp;&amp; 是"且"，表示两个都为0 ✗<br>C. <code>(!a)||(!b)</code> → 逻辑等价但用了隐式转换，不够规范<br>D. <code>(a==b==0)</code> → C++链式比较：先算 a==b 得 bool，再和0比较，完全错误 ✗</div>
-    <div class="analysis-note">💡 C 选项虽然逻辑等价，但 <code>!a</code> 依赖隐式 bool 转换，可读性差，A 是最标准的写法。</div>
+    <div class="analysis-step">A. <code>(!a)||(!b)</code> → <code>!a</code> 在 a 为 0 时为真（1），为 0 时为假（0）；<code>||</code> 表示"或"，只要 a 或 b 有一个为 0，结果就为真 ✓<br>B. <code>(a==b==0)</code> → C++ 链式比较：先算 <code>a==b</code> 得 0 或 1，再和 0 比较，无法正确判断 ✗<br>C. <code>(a==0)&amp;&amp;(b==0)</code> → &amp;&amp; 是"且"，表示 a 和 b <strong>都为</strong> 0 才成立，不符合"或"的要求 ✗<br>D. <code>(a==0)-(b==0)==0</code> → 当 a=0 且 b=0 时结果为 0，但当 a=0、b≠0 时结果为 -1≠0，无法正确判断"或"的关系 ✗</div>
+    <div class="analysis-note">💡 C++ 中 <code>!a</code> 是逻辑非运算符，对 int 类型变量，值为 0 时 <code>!a</code> 为 1（真），值非 0 时 <code>!a</code> 为 0（假）。这是 C++ 的标准用法。</div>
   </div>
-  <div class="analysis-conclusion">✅ 答案：A · (a==0)||(b==0)</div>
+  <div class="analysis-conclusion">✅ 答案：A · (!a)||(!b)</div>
 </div>
 </div></div>
 
