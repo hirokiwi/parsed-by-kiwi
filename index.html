@@ -32,6 +32,7 @@
     --code-pre: #c586c0;
     --code-var: #9cdcfe;
     --font-code: 'Fira Code', monospace;
+    --ligatures: none;
     --font-body: 'Noto Sans SC', sans-serif;
     --sidebar-w: 220px;
   }
@@ -267,18 +268,18 @@
   .mem-box.ref-box { border-color: rgba(74,222,128,0.4); background: rgba(74,222,128,0.06); }
   .mem-box.highlight { transform: scale(1.06); box-shadow: 0 0 30px rgba(249,115,22,0.4); border-color: var(--orange); }
   .mem-box .addr-label { font-size: 10px; letter-spacing: 1px; color: var(--text-dimmer); margin-bottom: 6px; text-transform: uppercase; }
-  .mem-box .var-name { font-family: var(--font-code); font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
-  .mem-box .var-val { font-family: var(--font-code); font-size: 22px; font-weight: 700; }
+  .mem-box .var-name { font-family: var(--font-code); font-variant-ligatures:none; font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+  .mem-box .var-val { font-family: var(--font-code); font-variant-ligatures:none; font-size: 22px; font-weight: 700; }
   .mem-box.var .var-val { color: var(--blue); }
   .mem-box.ptr .var-val { color: var(--orange); }
   .mem-box.ref-box .var-val { color: var(--green); }
-  .mem-box .type-tag { font-size: 10px; padding: 2px 8px; border-radius: 4px; margin-top: 8px; display: inline-block; font-family: var(--font-code); }
+  .mem-box .type-tag { font-size: 10px; padding: 2px 8px; border-radius: 4px; margin-top: 8px; display: inline-block; font-family: var(--font-code); font-variant-ligatures:none; }
   .mem-box.var .type-tag { background: rgba(96,165,250,0.15); color: var(--blue); }
   .mem-box.ptr .type-tag { background: rgba(249,115,22,0.15); color: var(--orange); }
   .mem-box.ref-box .type-tag { background: rgba(74,222,128,0.15); color: var(--green); }
   .mem-arrow { font-size: 28px; color: var(--text-dimmer); flex-shrink: 0; transition: color 0.3s; }
   .mem-arrow.arrow2 { color: var(--text-dimmer); opacity: 0.5; font-size: 20px; }
-  .addr-display { font-family: var(--font-code); font-size: 11px; color: var(--text-dimmer); margin-top: 6px; letter-spacing: 0.5px; }
+  .addr-display { font-family: var(--font-code); font-variant-ligatures:none; font-size: 11px; color: var(--text-dimmer); margin-top: 6px; letter-spacing: 0.5px; }
   .ptr-target {
     border: 2px dashed rgba(249,115,22,0.35); border-radius: 10px;
     padding: 16px 20px; min-width: 120px; text-align: center;
@@ -286,14 +287,14 @@
   }
   .ptr-target.highlight { border-color: var(--orange); background: rgba(249,115,22,0.12); }
   .ptr-target .addr-label { font-size: 10px; letter-spacing: 1px; color: var(--text-dimmer); margin-bottom: 6px; }
-  .ptr-target .var-val { font-family: var(--font-code); font-size: 20px; font-weight: 700; color: var(--blue); }
-  .dashed-arrow { display: flex; align-items: center; gap: 8px; color: var(--text-dimmer); font-size: 13px; font-family: var(--font-code); }
+  .ptr-target .var-val { font-family: var(--font-code); font-variant-ligatures:none; font-size: 20px; font-weight: 700; color: var(--blue); }
+  .dashed-arrow { display: flex; align-items: center; gap: 8px; color: var(--text-dimmer); font-size: 13px; font-family: var(--font-code); font-variant-ligatures:none; }
   .dashed-arrow::before, .dashed-arrow::after { content: ''; flex: 1; height: 1px; background: repeating-linear-gradient(to right, var(--text-dimmer) 0, var(--text-dimmer) 4px, transparent 4px, transparent 8px); opacity: 0.4; }
   .dashed-arrow.active { color: var(--orange); }
   .dashed-arrow.active::before, .dashed-arrow.active::after { background: repeating-linear-gradient(to right, var(--orange) 0, var(--orange) 4px, transparent 4px, transparent 8px); opacity: 1; }
 
   /* ── Code block ── */
-  .code-block { background: var(--code-bg); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; overflow: hidden; margin: 16px 0; font-family: var(--font-code); font-size: 13px; line-height: 1.8; }
+  .code-block { background: var(--code-bg); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; overflow: hidden; margin: 16px 0; font-family: var(--font-code); font-variant-ligatures:none; font-size: 13px; line-height: 1.8; }
   .code-header { display: flex; align-items: center; gap: 8px; padding: 10px 16px; background: rgba(255,255,255,0.03); border-bottom: 1px solid rgba(255,255,255,0.05); }
   .code-dot { width: 10px; height: 10px; border-radius: 50%; }
   .code-dot.r { background: #ff5f57; }
@@ -336,7 +337,7 @@
   .run-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
   /* ── Output ── */
-  .output-box { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 14px 18px; font-family: var(--font-code); font-size: 13px; margin-top: 12px; min-height: 40px; }
+  .output-box { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 14px 18px; font-family: var(--font-code); font-variant-ligatures:none; font-size: 13px; margin-top: 12px; min-height: 40px; }
   .output-box .prompt { color: var(--text-dimmer); }
   .output-box .out-val { color: var(--green); font-weight: 600; margin-left: 4px; }
   .output-line { display: flex; align-items: flex-start; gap: 10px; margin: 4px 0; }
@@ -364,7 +365,7 @@
   .swap-tab:hover:not(.active) { border-color: rgba(255,255,255,0.15); color: var(--text); }
   .swap-panel { display: none; }
   .swap-panel.active { display: block; }
-  .result-chip { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 8px; font-family: var(--font-code); font-size: 14px; font-weight: 600; margin: 8px 4px; }
+  .result-chip { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 8px; font-family: var(--font-code); font-variant-ligatures:none; font-size: 14px; font-weight: 600; margin: 8px 4px; }
   .result-chip.fail { background: rgba(248,113,113,0.12); border: 1px solid rgba(248,113,113,0.3); color: var(--red); }
   .result-chip.ok { background: rgba(74,222,128,0.12); border: 1px solid rgba(74,222,128,0.3); color: var(--green); }
   .result-chip .emoji { font-size: 16px; }
@@ -373,7 +374,7 @@
   .pitfall-card { background: rgba(248,113,113,0.05); border: 1px solid rgba(248,113,113,0.2); border-radius: 10px; padding: 20px 24px; margin: 12px 0; }
   .pitfall-card h5 { font-size: 14px; font-weight: 600; color: var(--red); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
   .pitfall-card p { font-size: 13px; color: var(--text-dim); }
-  .pitfall-card .code-inline { font-family: var(--font-code); font-size: 12px; background: rgba(0,0,0,0.3); padding: 2px 8px; border-radius: 4px; color: var(--red); }
+  .pitfall-card .code-inline { font-family: var(--font-code); font-variant-ligatures:none; font-size: 12px; background: rgba(0,0,0,0.3); padding: 2px 8px; border-radius: 4px; color: var(--red); }
 
   /* ── Table ── */
   .cmp-table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 14px; }
@@ -382,18 +383,18 @@
   .cmp-table tr:last-child td { border-bottom: none; }
   .cmp-table tr:hover td { background: rgba(255,255,255,0.02); }
   .cmp-table .dim { color: var(--text-dimmer); }
-  .cmp-table .tag-p { display: inline-block; padding: 2px 10px; border-radius: 4px; background: rgba(96,165,250,0.15); color: var(--blue); font-family: var(--font-code); font-size: 12px; }
-  .cmp-table .tag-r { display: inline-block; padding: 2px 10px; border-radius: 4px; background: rgba(74,222,128,0.15); color: var(--green); font-family: var(--font-code); font-size: 12px; }
+  .cmp-table .tag-p { display: inline-block; padding: 2px 10px; border-radius: 4px; background: rgba(96,165,250,0.15); color: var(--blue); font-family: var(--font-code); font-variant-ligatures:none; font-size: 12px; }
+  .cmp-table .tag-r { display: inline-block; padding: 2px 10px; border-radius: 4px; background: rgba(74,222,128,0.15); color: var(--green); font-family: var(--font-code); font-variant-ligatures:none; font-size: 12px; }
 
   /* ── Arith ── */
   .arith-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin: 16px 0; }
   .arith-card { background: rgba(0,0,0,0.2); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
-  .arith-card .arith-expr { font-family: var(--font-code); font-size: 15px; color: var(--orange); margin-bottom: 8px; }
+  .arith-card .arith-expr { font-family: var(--font-code); font-variant-ligatures:none; font-size: 15px; color: var(--orange); margin-bottom: 8px; }
   .arith-card .arith-desc { font-size: 13px; color: var(--text-dim); }
 
   /* ── Flow ── */
   .flow-row { display: flex; align-items: center; gap: 12px; justify-content: center; margin: 20px 0; flex-wrap: wrap; }
-  .flow-node { padding: 12px 20px; border-radius: 8px; border: 1px solid var(--border); background: var(--card-bg); font-size: 13px; font-family: var(--font-code); text-align: center; min-width: 100px; transition: all 0.3s; }
+  .flow-node { padding: 12px 20px; border-radius: 8px; border: 1px solid var(--border); background: var(--card-bg); font-size: 13px; font-family: var(--font-code); font-variant-ligatures:none; text-align: center; min-width: 100px; transition: all 0.3s; }
   .flow-node.cur { border-color: var(--orange); background: var(--orange-glow); color: var(--orange); }
   .flow-node.done { border-color: rgba(74,222,128,0.4); background: rgba(74,222,128,0.08); color: var(--green); }
   .flow-arrow { font-size: 20px; color: var(--text-dimmer); }
@@ -514,7 +515,7 @@
       <h4><span class="icon pointer">🧠</span>内存可视化</h4>
       <div class="callout">
         <span class="icon">💡</span>
-        <div>点击「▶ 运行动画」，观察指针变量 <code style="font-family:var(--font-code);color:var(--orange)">p</code> 中存储的是变量 <code style="font-family:var(--font-code);color:var(--blue)">a</code> 的<strong>内存地址</strong>。</div>
+        <div>点击「▶ 运行动画」，观察指针变量 <code style="font-family:var(--font-code); font-variant-ligatures:none;color:var(--orange)">p</code> 中存储的是变量 <code style="font-family:var(--font-code); font-variant-ligatures:none;color:var(--blue)">a</code> 的<strong>内存地址</strong>。</div>
       </div>
       <div class="memory-scene">
         <div class="scene-label">内存示意图</div>
@@ -566,7 +567,7 @@
   <div class="section reveal" id="sec-deref">
     <div class="section-label">§2 取地址 &amp; 解引用</div>
     <h3>两个核心运算符</h3>
-    <p><code style="font-family:var(--font-code);color:var(--orange)">&amp;</code> 取地址 和 <code style="font-family:var(--font-code);color:var(--orange)">*</code> 解引用，是指针操作的灵魂。</p>
+    <p><code style="font-family:var(--font-code); font-variant-ligatures:none;color:var(--orange)">&amp;</code> 取地址 和 <code style="font-family:var(--font-code); font-variant-ligatures:none;color:var(--orange)">*</code> 解引用，是指针操作的灵魂。</p>
 
     <div class="two-col">
       <div class="card">
@@ -581,11 +582,11 @@
         </div>
         <div style="text-align:center;padding:16px;">
           <div style="display:inline-flex;align-items:center;gap:12px;background:rgba(0,0,0,0.2);padding:14px 20px;border-radius:10px;border:1px solid var(--border);">
-            <span style="font-family:var(--font-code);color:var(--blue);font-size:15px;">x</span>
+            <span style="font-family:var(--font-code); font-variant-ligatures:none;color:var(--blue);font-size:15px;">x</span>
             <span style="color:var(--text-dimmer);font-size:20px;">→</span>
-            <span style="font-family:var(--font-code);color:var(--orange);font-size:15px;">0x7ffd...</span>
+            <span style="font-family:var(--font-code); font-variant-ligatures:none;color:var(--orange);font-size:15px;">0x7ffd...</span>
           </div>
-          <div style="font-size:12px;color:var(--text-dimmer);margin-top:8px;font-family:var(--font-code);">&amp;x 的结果是一个地址值</div>
+          <div style="font-size:12px;color:var(--text-dimmer);margin-top:8px;font-family:var(--font-code); font-variant-ligatures:none;">&amp;x 的结果是一个地址值</div>
         </div>
       </div>
 
@@ -603,13 +604,13 @@
         </div>
         <div style="text-align:center;padding:16px;">
           <div style="display:inline-flex;align-items:center;gap:12px;background:rgba(0,0,0,0.2);padding:14px 20px;border-radius:10px;border:1px solid var(--border);">
-            <span style="font-family:var(--font-code);color:var(--orange);font-size:15px;">*px</span>
+            <span style="font-family:var(--font-code); font-variant-ligatures:none;color:var(--orange);font-size:15px;">*px</span>
             <span style="color:var(--text-dimmer);font-size:20px;">→</span>
-            <span style="font-family:var(--font-code);color:var(--blue);font-size:15px;">x</span>
+            <span style="font-family:var(--font-code); font-variant-ligatures:none;color:var(--blue);font-size:15px;">x</span>
             <span style="color:var(--text-dimmer);font-size:20px;">→</span>
-            <span style="font-family:var(--font-code);color:var(--blue);font-size:15px;">100</span>
+            <span style="font-family:var(--font-code); font-variant-ligatures:none;color:var(--blue);font-size:15px;">100</span>
           </div>
-          <div style="font-size:12px;color:var(--text-dimmer);margin-top:8px;font-family:var(--font-code);">*px 找到 px 存的地址，对应变量 x</div>
+          <div style="font-size:12px;color:var(--text-dimmer);margin-top:8px;font-family:var(--font-code); font-variant-ligatures:none;">*px 找到 px 存的地址，对应变量 x</div>
         </div>
       </div>
     </div>
@@ -621,7 +622,7 @@
         <div class="arith-card">
           <div class="arith-expr">int arr[5] = {10,20,30};</div>
           <div class="arith-expr">int* p = arr;</div>
-          <div style="font-size:11px;color:var(--text-dimmer);margin-top:8px;font-family:var(--font-code);">
+          <div style="font-size:11px;color:var(--text-dimmer);margin-top:8px;font-family:var(--font-code); font-variant-ligatures:none;">
             arr == &amp;arr[0]<br>
             p+1 == &amp;arr[1] （地址 +4字节）<br>
             *(p+1) == 20
@@ -633,7 +634,7 @@
         </div>
         <div class="arith-card">
           <div class="arith-expr">*p++ vs *(p++)</div>
-          <div class="arith-desc"><code style="font-family:var(--font-code);color:var(--orange)">*p++</code>：先取 *p 的值，<br>再把指针向后移 1 位。<br>常用于遍历数组。</div>
+          <div class="arith-desc"><code style="font-family:var(--font-code); font-variant-ligatures:none;color:var(--orange)">*p++</code>：先取 *p 的值，<br>再把指针向后移 1 位。<br>常用于遍历数组。</div>
         </div>
       </div>
     </div>
@@ -751,14 +752,14 @@
               <div class="mem-box var" style="border-color:rgba(96,165,250,0.4);">
                 <div class="addr-label">main 栈帧</div>
                 <div style="font-size:12px;color:var(--text-dimmer);margin-bottom:4px;">变量</div>
-                <div><span style="font-family:var(--font-code);color:var(--blue);">a = 1</span></div>
-                <div><span style="font-family:var(--font-code);color:var(--blue);">b = 2</span></div>
+                <div><span style="font-family:var(--font-code); font-variant-ligatures:none;color:var(--blue);">a = 1</span></div>
+                <div><span style="font-family:var(--font-code); font-variant-ligatures:none;color:var(--blue);">b = 2</span></div>
               </div>
               <div class="mem-box ptr" style="opacity:0.4;">
                 <div class="addr-label">swap 栈帧</div>
                 <div style="font-size:12px;color:var(--text-dimmer);margin-bottom:4px;">形参副本</div>
-                <div><span style="font-family:var(--font-code);color:var(--orange);">x = 1 → 2</span></div>
-                <div><span style="font-family:var(--font-code);color:var(--orange);">y = 2 → 1</span></div>
+                <div><span style="font-family:var(--font-code); font-variant-ligatures:none;color:var(--orange);">x = 1 → 2</span></div>
+                <div><span style="font-family:var(--font-code); font-variant-ligatures:none;color:var(--orange);">y = 2 → 1</span></div>
               </div>
             </div>
             <div style="font-size:13px;color:var(--red);text-align:center;">⚠ swap 函数结束后，swap 栈帧被销毁，交换结果丢失</div>
@@ -827,14 +828,14 @@
           <tr><th>对比维度</th><th><span class="tag-p">指针 *</span></th><th><span class="tag-r">引用 &amp;</span></th></tr>
         </thead>
         <tbody>
-          <tr><td class="dim">定义方式</td><td><code style="font-family:var(--font-code);font-size:12px;">int* p</code></td><td><code style="font-family:var(--font-code);font-size:12px;">int&amp; r = a</code></td></tr>
+          <tr><td class="dim">定义方式</td><td><code style="font-family:var(--font-code); font-variant-ligatures:none;font-size:12px;">int* p</code></td><td><code style="font-family:var(--font-code); font-variant-ligatures:none;font-size:12px;">int&amp; r = a</code></td></tr>
           <tr><td class="dim">是否必须初始化</td><td>可以不初始化（危险⚠）</td><td>必须初始化（语法强制）</td></tr>
-          <tr><td class="dim">能否为空</td><td>可以 <code style="font-family:var(--font-code);font-size:11px;color:var(--orange)">nullptr</code></td><td>不能为 null</td></tr>
-          <tr><td class="dim">能否重新指向</td><td>可以 <code style="font-family:var(--font-code);font-size:12px;">p = &amp;b;</code></td><td>不可以，<code style="font-family:var(--font-code);font-size:12px;">r=b</code> 是赋值操作</td></tr>
-          <tr><td class="dim">解引用</td><td>需要 <code style="font-family:var(--font-code);font-size:12px;">*p = 10</code></td><td>直接使用 <code style="font-family:var(--font-code);font-size:12px;">r = 10</code></td></tr>
-          <tr><td class="dim">sizeof 结果</td><td>固定 4/8 字节</td><td>与原变量相同（如 <code style="font-family:var(--font-code);font-size:12px;">sizeof(int&amp;)</code>=4）</td></tr>
-          <tr><td class="dim">多级形式</td><td>支持 <code style="font-family:var(--font-code);font-size:12px;">int**</code>、<code style="font-family:var(--font-code);font-size:12px;">int***</code></td><td>不支持（<code style="font-family:var(--font-code);font-size:12px;">int&amp;&amp;</code> 是右值引用）</td></tr>
-          <tr><td class="dim">函数参数检查</td><td>需要检查是否为 <code style="font-family:var(--font-code);font-size:12px;">nullptr</code></td><td>无需检查（默认有效）</td></tr>
+          <tr><td class="dim">能否为空</td><td>可以 <code style="font-family:var(--font-code); font-variant-ligatures:none;font-size:11px;color:var(--orange)">nullptr</code></td><td>不能为 null</td></tr>
+          <tr><td class="dim">能否重新指向</td><td>可以 <code style="font-family:var(--font-code); font-variant-ligatures:none;font-size:12px;">p = &amp;b;</code></td><td>不可以，<code style="font-family:var(--font-code); font-variant-ligatures:none;font-size:12px;">r=b</code> 是赋值操作</td></tr>
+          <tr><td class="dim">解引用</td><td>需要 <code style="font-family:var(--font-code); font-variant-ligatures:none;font-size:12px;">*p = 10</code></td><td>直接使用 <code style="font-family:var(--font-code); font-variant-ligatures:none;font-size:12px;">r = 10</code></td></tr>
+          <tr><td class="dim">sizeof 结果</td><td>固定 4/8 字节</td><td>与原变量相同（如 <code style="font-family:var(--font-code); font-variant-ligatures:none;font-size:12px;">sizeof(int&amp;)</code>=4）</td></tr>
+          <tr><td class="dim">多级形式</td><td>支持 <code style="font-family:var(--font-code); font-variant-ligatures:none;font-size:12px;">int**</code>、<code style="font-family:var(--font-code); font-variant-ligatures:none;font-size:12px;">int***</code></td><td>不支持（<code style="font-family:var(--font-code); font-variant-ligatures:none;font-size:12px;">int&amp;&amp;</code> 是右值引用）</td></tr>
+          <tr><td class="dim">函数参数检查</td><td>需要检查是否为 <code style="font-family:var(--font-code); font-variant-ligatures:none;font-size:12px;">nullptr</code></td><td>无需检查（默认有效）</td></tr>
           <tr><td class="dim">底层本质</td><td>独立变量，存地址值</td><td>原变量的别名（底层是常量指针）</td></tr>
           <tr><td class="dim">语法简洁度</td><td>需要 &amp; 和 *，相对繁琐</td><td>像普通变量一样使用，最简洁</td></tr>
         </tbody>
@@ -865,7 +866,7 @@
 <div class="code-line"><span class="ln">2</span><span class="src"><span class="hl-orange">*p = 100</span>; <span class="cmt">// 💀 危险！可能崩溃或破坏数据</span></span></div>
         </div>
       </div>
-      <p style="margin-top:8px;">✅ 正确：<code style="font-family:var(--font-code);font-size:12px;">int* p = nullptr;</code> 或 <code style="font-family:var(--font-code);font-size:12px;">int* p = &amp;a;</code></p>
+      <p style="margin-top:8px;">✅ 正确：<code style="font-family:var(--font-code); font-variant-ligatures:none;font-size:12px;">int* p = nullptr;</code> 或 <code style="font-family:var(--font-code); font-variant-ligatures:none;font-size:12px;">int* p = &amp;a;</code></p>
     </div>
 
     <div class="pitfall-card">
@@ -877,7 +878,7 @@
 <div class="code-line"><span class="ln">2</span><span class="src"><span class="hl-orange">cout &lt;&lt; *p;</span>   <span class="cmt">// 💀 崩溃！不能解引用 nullptr</span></span></div>
         </div>
       </div>
-      <p style="margin-top:8px;">✅ 正确：解引用前先判断 <code style="font-family:var(--font-code);font-size:12px;">if(p != nullptr)</code></p>
+      <p style="margin-top:8px;">✅ 正确：解引用前先判断 <code style="font-family:var(--font-code); font-variant-ligatures:none;font-size:12px;">if(p != nullptr)</code></p>
     </div>
 
     <div class="pitfall-card">
